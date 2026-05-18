@@ -33,7 +33,7 @@ export function AuroraBackground({ className = '' }: { className?: string }) {
   }
 
   return (
-    <div ref={containerRef} className={`overflow-hidden ${className}`}>
+    <div ref={containerRef} className={`${className}`}>
       {/* Base dark background */}
       <div className="absolute inset-0 bg-[#050508]" />
       
