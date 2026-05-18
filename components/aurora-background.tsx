@@ -4,19 +4,21 @@ import { useRef, useEffect, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 
-function AuroraShader() {
+function AuroraShader({ scrollProgress }: { scrollProgress: number }) {
   const meshRef = useRef<THREE.Mesh>(null)
   const { viewport } = useThree()
-  const [time, setTime] = useState(0)
 
   const uniforms = useRef({
     uTime: { value: 0 },
     uResolution: { value: new THREE.Vector2(viewport.width, viewport.height) },
+    uScrollProgress: { value: 0 },
   })
 
   useFrame((state) => {
     if (meshRef.current) {
       uniforms.current.uTime.value = state.clock.elapsedTime * 0.3
+      // Smoothly interpolate scroll progress
+      uniforms.current.uScrollProgress.value += (scrollProgress - uniforms.current.uScrollProgress.value) * 0.1
     }
   })
 
@@ -35,6 +37,7 @@ function AuroraShader() {
   const fragmentShader = `
     uniform float uTime;
     uniform vec2 uResolution;
+    uniform float uScrollProgress;
     varying vec2 vUv;
     
     // Simplex noise function
@@ -84,6 +87,10 @@ function AuroraShader() {
       vec2 p = uv * 2.0 - 1.0;
       p.x *= uResolution.x / uResolution.y;
       
+      // Scroll-based vertical shift for parallax effect
+      float scrollOffset = uScrollProgress * 0.5;
+      p.y += scrollOffset;
+      
       // Deep navy base
       vec3 bgColor = vec3(0.02, 0.02, 0.03);
       
@@ -93,10 +100,14 @@ function AuroraShader() {
       vec3 indigo = vec3(0.39, 0.4, 0.95);
       vec3 navy = vec3(0.06, 0.08, 0.18);
       
+      // Scroll affects animation speed - aurora moves faster as you scroll
+      float scrollSpeedBoost = 1.0 + uScrollProgress * 0.5;
+      float adjustedTime = uTime * scrollSpeedBoost;
+      
       // Create flowing aurora effect
-      float n1 = fbm(vec2(p.x * 0.8 + uTime * 0.15, p.y * 1.2 + uTime * 0.1));
-      float n2 = fbm(vec2(p.x * 1.2 - uTime * 0.1, p.y * 0.8 - uTime * 0.08));
-      float n3 = fbm(vec2(p.x * 0.6 + uTime * 0.05, p.y * 1.5 + n1 * 0.5));
+      float n1 = fbm(vec2(p.x * 0.8 + adjustedTime * 0.15, p.y * 1.2 + adjustedTime * 0.1));
+      float n2 = fbm(vec2(p.x * 1.2 - adjustedTime * 0.1, p.y * 0.8 - adjustedTime * 0.08));
+      float n3 = fbm(vec2(p.x * 0.6 + adjustedTime * 0.05, p.y * 1.5 + n1 * 0.5));
       
       // Vertical gradient for aurora positioning
       float vertGrad = smoothstep(-0.2, 0.8, p.y);
@@ -111,16 +122,18 @@ function AuroraShader() {
       auroraColor = mix(auroraColor, teal, aurora2 * 0.8);
       auroraColor = mix(auroraColor, indigo, aurora3 * 0.6);
       
-      // Add glow
-      float glow = (aurora1 + aurora2 * 0.5 + aurora3 * 0.3) * 0.3;
+      // Add glow - intensifies slightly with scroll
+      float glowIntensity = 0.3 + uScrollProgress * 0.15;
+      float glow = (aurora1 + aurora2 * 0.5 + aurora3 * 0.3) * glowIntensity;
       auroraColor += green * glow * 0.4;
       
       // Fade towards edges
       float vignette = 1.0 - length(p) * 0.4;
       vignette = clamp(vignette, 0.0, 1.0);
       
-      // Combine with background - subtle opacity for atmospheric depth
-      vec3 finalColor = mix(bgColor, auroraColor, vignette * 0.38);
+      // Opacity increases subtly as user scrolls (0.38 to 0.5)
+      float baseOpacity = 0.38 + uScrollProgress * 0.12;
+      vec3 finalColor = mix(bgColor, auroraColor, vignette * baseOpacity);
       
       // Subtle color grading
       finalColor = pow(finalColor, vec3(0.95));
@@ -143,9 +156,22 @@ function AuroraShader() {
 
 export function AuroraBackground({ className = '' }: { className?: string }) {
   const [mounted, setMounted] = useState(false)
+  const [scrollProgress, setScrollProgress] = useState(0)
 
   useEffect(() => {
     setMounted(true)
+    
+    const handleScroll = () => {
+      // Calculate scroll progress (0 to 1) based on viewport height
+      const scrollY = window.scrollY
+      const viewportHeight = window.innerHeight
+      // Progress from 0 to 1 over first 2 viewport heights of scroll
+      const progress = Math.min(scrollY / (viewportHeight * 2), 1)
+      setScrollProgress(progress)
+    }
+    
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   if (!mounted) {
@@ -162,7 +188,7 @@ export function AuroraBackground({ className = '' }: { className?: string }) {
         dpr={[1, 1.5]}
         style={{ background: 'transparent' }}
       >
-        <AuroraShader />
+        <AuroraShader scrollProgress={scrollProgress} />
       </Canvas>
     </div>
   )

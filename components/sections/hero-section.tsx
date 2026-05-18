@@ -8,13 +8,13 @@ import { TechMarquee } from '@/components/tech-marquee'
 
 export function HeroSection() {
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden">
+    <section className="relative min-h-screen flex flex-col overflow-hidden">
       {/* Aurora Background */}
       <AuroraBackground className="absolute inset-0 z-0" />
       
       {/* Content */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+      <div className="relative z-10 flex-1 flex flex-col w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8">
+        <div className="flex-1 grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
           {/* Left side - Text content */}
           <div className="space-y-8">
             {/* Badge */}
@@ -104,30 +104,30 @@ export function HeroSection() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.6 }}
-          className="mt-16 lg:mt-24"
+          className="mt-12 lg:mt-16"
         >
           <TechMarquee />
         </motion.div>
-      </div>
 
-      {/* Scroll indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1, delay: 1 }}
-        className="absolute bottom-16 left-1/2 -translate-x-1/2 hidden md:block"
-      >
-        <div className="flex flex-col items-center gap-2">
-          <span className="text-xs text-muted-foreground uppercase tracking-widest">Scroll</span>
-          <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-            className="w-5 h-8 rounded-full border border-border flex items-start justify-center p-1"
-          >
-            <div className="w-1 h-2 bg-primary rounded-full" />
-          </motion.div>
-        </div>
-      </motion.div>
+        {/* Scroll indicator - now in document flow with proper spacing */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, delay: 1 }}
+          className="mt-8 flex justify-center hidden md:flex"
+        >
+          <div className="flex flex-col items-center gap-2">
+            <span className="text-xs text-muted-foreground uppercase tracking-widest">Scroll</span>
+            <motion.div
+              animate={{ y: [0, 8, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+              className="w-5 h-8 rounded-full border border-border flex items-start justify-center p-1"
+            >
+              <div className="w-1 h-2 bg-primary rounded-full" />
+            </motion.div>
+          </div>
+        </motion.div>
+      </div>
     </section>
   )
 }
