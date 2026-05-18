@@ -23,7 +23,6 @@ export function AuroraBackground({ className = '' }: { className?: string }) {
 
   useEffect(() => {
     setMounted(true)
-    console.log('[v0] AuroraBackground mounted')
   }, [])
 
   if (!mounted) {
