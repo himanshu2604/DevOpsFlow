@@ -1,148 +1,25 @@
 'use client'
 
-import { useRef, useEffect, useState } from 'react'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import * as THREE from 'three'
-
-function AuroraShader() {
-  const meshRef = useRef<THREE.Mesh>(null)
-  const { viewport } = useThree()
-  const [time, setTime] = useState(0)
-
-  const uniforms = useRef({
-    uTime: { value: 0 },
-    uResolution: { value: new THREE.Vector2(viewport.width, viewport.height) },
-  })
-
-  useFrame((state) => {
-    if (meshRef.current) {
-      uniforms.current.uTime.value = state.clock.elapsedTime * 0.3
-    }
-  })
-
-  useEffect(() => {
-    uniforms.current.uResolution.value.set(viewport.width, viewport.height)
-  }, [viewport])
-
-  const vertexShader = `
-    varying vec2 vUv;
-    void main() {
-      vUv = uv;
-      gl_Position = vec4(position, 1.0);
-    }
-  `
-
-  const fragmentShader = `
-    uniform float uTime;
-    uniform vec2 uResolution;
-    varying vec2 vUv;
-    
-    // Simplex noise function
-    vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
-    
-    float snoise(vec2 v) {
-      const vec4 C = vec4(0.211324865405187, 0.366025403784439,
-               -0.577350269189626, 0.024390243902439);
-      vec2 i  = floor(v + dot(v, C.yy));
-      vec2 x0 = v -   i + dot(i, C.xx);
-      vec2 i1;
-      i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
-      vec4 x12 = x0.xyxy + C.xxzz;
-      x12.xy -= i1;
-      i = mod(i, 289.0);
-      vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))
-        + i.x + vec3(0.0, i1.x, 1.0 ));
-      vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy),
-        dot(x12.zw,x12.zw)), 0.0);
-      m = m*m;
-      m = m*m;
-      vec3 x = 2.0 * fract(p * C.www) - 1.0;
-      vec3 h = abs(x) - 0.5;
-      vec3 ox = floor(x + 0.5);
-      vec3 a0 = x - ox;
-      m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
-      vec3 g;
-      g.x  = a0.x  * x0.x  + h.x  * x0.y;
-      g.yz = a0.yz * x12.xz + h.yz * x12.yw;
-      return 130.0 * dot(m, g);
-    }
-    
-    float fbm(vec2 p) {
-      float value = 0.0;
-      float amplitude = 0.5;
-      float frequency = 1.0;
-      for(int i = 0; i < 5; i++) {
-        value += amplitude * snoise(p * frequency);
-        amplitude *= 0.5;
-        frequency *= 2.0;
-      }
-      return value;
-    }
-    
-    void main() {
-      vec2 uv = vUv;
-      vec2 p = uv * 2.0 - 1.0;
-      p.x *= uResolution.x / uResolution.y;
-      
-      // Deep navy base
-      vec3 bgColor = vec3(0.02, 0.02, 0.03);
-      
-      // Aurora colors
-      vec3 green = vec3(0.0, 0.9, 0.63);
-      vec3 teal = vec3(0.0, 0.72, 0.83);
-      vec3 indigo = vec3(0.39, 0.4, 0.95);
-      vec3 navy = vec3(0.06, 0.08, 0.18);
-      
-      // Create flowing aurora effect
-      float n1 = fbm(vec2(p.x * 0.8 + uTime * 0.15, p.y * 1.2 + uTime * 0.1));
-      float n2 = fbm(vec2(p.x * 1.2 - uTime * 0.1, p.y * 0.8 - uTime * 0.08));
-      float n3 = fbm(vec2(p.x * 0.6 + uTime * 0.05, p.y * 1.5 + n1 * 0.5));
-      
-      // Vertical gradient for aurora positioning
-      float vertGrad = smoothstep(-0.2, 0.8, p.y);
-      
-      // Aurora bands
-      float aurora1 = smoothstep(0.2, 0.8, n1 + vertGrad * 0.5) * 0.6;
-      float aurora2 = smoothstep(0.3, 0.7, n2 + vertGrad * 0.3) * 0.4;
-      float aurora3 = smoothstep(0.1, 0.9, n3 + vertGrad * 0.4) * 0.3;
-      
-      // Mix aurora colors
-      vec3 auroraColor = mix(navy, green, aurora1);
-      auroraColor = mix(auroraColor, teal, aurora2 * 0.8);
-      auroraColor = mix(auroraColor, indigo, aurora3 * 0.6);
-      
-      // Add glow
-      float glow = (aurora1 + aurora2 * 0.5 + aurora3 * 0.3) * 0.3;
-      auroraColor += green * glow * 0.4;
-      
-      // Fade towards edges
-      float vignette = 1.0 - length(p) * 0.4;
-      vignette = clamp(vignette, 0.0, 1.0);
-      
-      // Combine with background
-      vec3 finalColor = mix(bgColor, auroraColor, vignette * 0.7);
-      
-      // Subtle color grading
-      finalColor = pow(finalColor, vec3(0.95));
-      
-      gl_FragColor = vec4(finalColor, 1.0);
-    }
-  `
-
-  return (
-    <mesh ref={meshRef} position={[0, 0, 0]}>
-      <planeGeometry args={[2, 2]} />
-      <shaderMaterial
-        vertexShader={vertexShader}
-        fragmentShader={fragmentShader}
-        uniforms={uniforms.current}
-      />
-    </mesh>
-  )
-}
+import { useEffect, useState, useRef } from 'react'
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
 
 export function AuroraBackground({ className = '' }: { className?: string }) {
   const [mounted, setMounted] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+  
+  const { scrollY } = useScroll()
+  
+  // Transform scroll position into aurora effects
+  const scrollProgress = useTransform(scrollY, [0, 800], [0, 1])
+  const smoothProgress = useSpring(scrollProgress, { stiffness: 100, damping: 30 })
+  
+  // Aurora blob movements based on scroll
+  const blob1Y = useTransform(smoothProgress, [0, 1], [0, -150])
+  const blob2Y = useTransform(smoothProgress, [0, 1], [0, -200])
+  const blob3Y = useTransform(smoothProgress, [0, 1], [0, -100])
+  
+  // Opacity increases as user scrolls
+  const auroraOpacity = useTransform(smoothProgress, [0, 1], [1, 1])
 
   useEffect(() => {
     setMounted(true)
@@ -150,20 +27,151 @@ export function AuroraBackground({ className = '' }: { className?: string }) {
 
   if (!mounted) {
     return (
-      <div className={`bg-gradient-to-b from-[#050508] via-[#0a0f18] to-[#050508] ${className}`} />
+      <div className={`bg-[#050508] ${className}`} />
     )
   }
 
   return (
-    <div className={`${className}`}>
-      <Canvas
-        camera={{ position: [0, 0, 1] }}
-        gl={{ antialias: true, alpha: true }}
-        dpr={[1, 1.5]}
-        style={{ background: 'transparent' }}
+    <div ref={containerRef} className={`${className}`}>
+      {/* Base dark background */}
+      <div className="absolute inset-0 bg-[#050508]" />
+      
+      {/* Aurora container */}
+      <motion.div 
+        className="absolute inset-0"
+        style={{ opacity: auroraOpacity }}
       >
-        <AuroraShader />
-      </Canvas>
+        {/* Primary green aurora blob - larger and more visible */}
+        <motion.div
+          className="absolute top-[-10%] left-[5%] w-[90%] h-[70%] rounded-full"
+          style={{
+            background: 'radial-gradient(ellipse at center, rgba(0, 230, 161, 0.25) 0%, rgba(0, 184, 212, 0.15) 40%, transparent 70%)',
+            filter: 'blur(80px)',
+            y: blob1Y,
+          }}
+          animate={{
+            x: [0, 40, -30, 20, 0],
+            scale: [1, 1.15, 0.95, 1.1, 1],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        
+        {/* Secondary teal aurora blob */}
+        <motion.div
+          className="absolute top-[5%] right-[-15%] w-[70%] h-[60%] rounded-full"
+          style={{
+            background: 'radial-gradient(ellipse at center, rgba(0, 184, 212, 0.2) 0%, rgba(16, 185, 129, 0.12) 50%, transparent 70%)',
+            filter: 'blur(70px)',
+            y: blob2Y,
+          }}
+          animate={{
+            x: [0, -50, 30, -20, 0],
+            scale: [1, 0.9, 1.15, 0.95, 1],
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        
+        {/* Left side accent blob */}
+        <motion.div
+          className="absolute top-[20%] left-[-10%] w-[60%] h-[50%] rounded-full"
+          style={{
+            background: 'radial-gradient(ellipse at center, rgba(16, 185, 129, 0.18) 0%, rgba(0, 230, 161, 0.08) 60%, transparent 80%)',
+            filter: 'blur(60px)',
+            y: blob3Y,
+          }}
+          animate={{
+            x: [0, 60, -40, 30, 0],
+            scale: [1, 1.2, 0.85, 1.1, 1],
+          }}
+          transition={{
+            duration: 18,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        
+        {/* Floating accent particle 1 */}
+        <motion.div
+          className="absolute top-[10%] left-[55%] w-[25%] h-[25%] rounded-full"
+          style={{
+            background: 'radial-gradient(circle, rgba(0, 230, 161, 0.2) 0%, transparent 70%)',
+            filter: 'blur(40px)',
+          }}
+          animate={{
+            x: [0, 40, -30, 0],
+            y: [0, -50, 30, 0],
+            scale: [1, 1.3, 0.7, 1],
+            opacity: [0.6, 1, 0.4, 0.6],
+          }}
+          transition={{
+            duration: 15,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        
+        {/* Floating accent particle 2 */}
+        <motion.div
+          className="absolute top-[35%] right-[15%] w-[20%] h-[20%] rounded-full"
+          style={{
+            background: 'radial-gradient(circle, rgba(0, 184, 212, 0.25) 0%, transparent 70%)',
+            filter: 'blur(35px)',
+          }}
+          animate={{
+            x: [0, -35, 45, 0],
+            y: [0, 40, -30, 0],
+            scale: [1, 0.8, 1.4, 1],
+            opacity: [0.5, 0.9, 0.3, 0.5],
+          }}
+          transition={{
+            duration: 12,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        
+        {/* Bottom glow */}
+        <motion.div
+          className="absolute bottom-[-20%] left-[20%] w-[60%] h-[40%] rounded-full"
+          style={{
+            background: 'radial-gradient(ellipse at center, rgba(0, 230, 161, 0.12) 0%, transparent 70%)',
+            filter: 'blur(50px)',
+          }}
+          animate={{
+            x: [0, 30, -20, 0],
+            scale: [1, 1.1, 0.9, 1],
+          }}
+          transition={{
+            duration: 22,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+      </motion.div>
+      
+      {/* Subtle noise texture */}
+      <div 
+        className="absolute inset-0 opacity-[0.02] pointer-events-none"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+        }}
+      />
+      
+      {/* Vignette */}
+      <div 
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: 'radial-gradient(ellipse at center, transparent 0%, rgba(5, 5, 8, 0.5) 100%)',
+        }}
+      />
     </div>
   )
 }
