@@ -55,24 +55,47 @@ export function HowItWorksSection() {
 
         {/* Timeline */}
         <div ref={containerRef} className="relative">
-          {/* Connection line - desktop */}
-          <div className="hidden lg:block absolute top-24 left-0 right-0 h-px">
-            <motion.div
-              initial={{ scaleX: 0 }}
-              animate={isInView ? { scaleX: 1 } : { scaleX: 0 }}
-              transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-              className="h-full bg-gradient-to-r from-transparent via-primary/50 to-transparent origin-left"
-            />
+          {/* Animated SVG connection line - desktop */}
+          <div className="hidden lg:block absolute top-8 left-[calc(16.67%-32px)] right-[calc(16.67%-32px)] h-px">
+            <svg className="w-full h-4 overflow-visible" preserveAspectRatio="none">
+              <motion.line
+                x1="0"
+                y1="8"
+                x2="100%"
+                y2="8"
+                stroke="url(#lineGradient)"
+                strokeWidth="2"
+                strokeLinecap="round"
+                initial={{ pathLength: 0 }}
+                animate={isInView ? { pathLength: 1 } : { pathLength: 0 }}
+                transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+              />
+              <defs>
+                <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="rgb(16, 185, 129)" stopOpacity="0.8" />
+                  <stop offset="50%" stopColor="rgb(16, 185, 129)" stopOpacity="1" />
+                  <stop offset="100%" stopColor="rgb(16, 185, 129)" stopOpacity="0.8" />
+                </linearGradient>
+              </defs>
+            </svg>
           </div>
 
-          {/* Connection line - mobile */}
-          <div className="lg:hidden absolute top-0 bottom-0 left-8 w-px">
-            <motion.div
-              initial={{ scaleY: 0 }}
-              animate={isInView ? { scaleY: 1 } : { scaleY: 0 }}
-              transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-              className="h-full bg-gradient-to-b from-primary/50 via-primary/50 to-transparent origin-top"
-            />
+          {/* Animated SVG connection line - mobile */}
+          <div className="lg:hidden absolute top-0 bottom-0 left-8 w-4">
+            <svg className="w-4 h-full overflow-visible" preserveAspectRatio="none">
+              <motion.line
+                x1="8"
+                y1="32"
+                x2="8"
+                y2="calc(100% - 32px)"
+                stroke="rgb(16, 185, 129)"
+                strokeWidth="2"
+                strokeLinecap="round"
+                initial={{ pathLength: 0 }}
+                animate={isInView ? { pathLength: 1 } : { pathLength: 0 }}
+                transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+              />
+            </svg>
           </div>
 
           <div className="grid lg:grid-cols-3 gap-12 lg:gap-8">
@@ -85,20 +108,20 @@ export function HowItWorksSection() {
                 viewport={{ once: true }}
                 className="relative pl-20 lg:pl-0"
               >
-                {/* Step number circle */}
+                {/* Step number circle - green filled */}
                 <div className="absolute left-0 lg:relative lg:mx-auto lg:mb-8">
                   <motion.div
                     initial={{ scale: 0 }}
                     whileInView={{ scale: 1 }}
                     transition={{ duration: 0.5, delay: index * 0.2 + 0.3 }}
                     viewport={{ once: true }}
-                    className="w-16 h-16 rounded-full bg-card border border-primary/30 flex items-center justify-center relative"
+                    className="w-16 h-16 rounded-full bg-primary flex items-center justify-center relative shadow-lg shadow-primary/30"
                   >
-                    <span className="text-2xl font-display font-bold text-primary">
+                    <span className="text-2xl font-display font-bold text-primary-foreground">
                       {step.number}
                     </span>
                     {/* Glow effect */}
-                    <div className="absolute inset-0 rounded-full bg-primary/10 blur-xl" />
+                    <div className="absolute inset-0 rounded-full bg-primary/30 blur-xl -z-10" />
                   </motion.div>
                 </div>
 
@@ -110,7 +133,8 @@ export function HowItWorksSection() {
                   <p className="text-muted-foreground leading-relaxed mb-4">
                     {step.description}
                   </p>
-                  <span className="inline-flex items-center gap-2 text-sm text-primary font-mono">
+                  {/* Time badge */}
+                  <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-card border border-border text-sm text-primary font-mono">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>

@@ -11,7 +11,7 @@ const painPoints = [
       </svg>
     ),
     title: 'Slow Deployments',
-    description: 'Manual deploys taking hours? Your competitors ship daily while you wait for someone to ssh into prod.',
+    description: 'Manual steps and no caching add 30+ minutes to every release. Engineers dread deploy day.',
     stat: '4+ hours',
     statLabel: 'avg deploy time without CI/CD',
   },
@@ -22,7 +22,7 @@ const painPoints = [
       </svg>
     ),
     title: 'Zero Observability',
-    description: "Finding out about outages from your users on Twitter? That's not a monitoring strategy.",
+    description: 'You find out about outages from users on Twitter, not from your monitoring system.',
     stat: '40 min',
     statLabel: 'avg time to detect issues',
   },
@@ -33,11 +33,33 @@ const painPoints = [
       </svg>
     ),
     title: 'Runaway Cloud Costs',
-    description: 'AWS bill growing faster than revenue? Unused resources and over-provisioned instances are killing your runway.',
+    description: 'AWS bills grow 40% month-over-month with no tagging, no rightsizing, and no cost alerts.',
     stat: '30%+',
     statLabel: 'typical cloud waste',
   },
 ]
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+}
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      ease: [0.16, 1, 0.3, 1],
+    },
+  },
+}
 
 export function PainPointsSection() {
   return (
@@ -65,43 +87,50 @@ export function PainPointsSection() {
           </p>
         </motion.div>
 
-        {/* Pain point cards */}
-        <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
-          {painPoints.map((point, index) => (
-            <GlassCard
-              key={point.title}
-              delay={index * 0.1}
-              className="p-8 hover:border-primary/30 transition-colors duration-300"
-            >
-              <div className="space-y-6">
-                {/* Icon */}
-                <div className="text-primary">
-                  {point.icon}
-                </div>
-                
-                {/* Title */}
-                <h3 className="text-xl font-display font-semibold text-foreground">
-                  {point.title}
-                </h3>
-                
-                {/* Description */}
-                <p className="text-muted-foreground leading-relaxed">
-                  {point.description}
-                </p>
-                
-                {/* Stat */}
-                <div className="pt-4 border-t border-border/50">
-                  <div className="text-2xl font-display font-bold text-warning">
-                    {point.stat}
+        {/* Pain point cards with staggered animation */}
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-50px' }}
+          className="grid md:grid-cols-3 gap-6 lg:gap-8"
+        >
+          {painPoints.map((point) => (
+            <motion.div key={point.title} variants={cardVariants}>
+              <GlassCard
+                delay={0}
+                className="p-8 hover:border-primary/30 transition-colors duration-300 h-full"
+              >
+                <div className="space-y-6">
+                  {/* Icon */}
+                  <div className="text-primary">
+                    {point.icon}
                   </div>
-                  <div className="text-sm text-muted-foreground">
-                    {point.statLabel}
+                  
+                  {/* Title */}
+                  <h3 className="text-xl font-display font-semibold text-foreground">
+                    {point.title}
+                  </h3>
+                  
+                  {/* Description */}
+                  <p className="text-muted-foreground leading-relaxed">
+                    {point.description}
+                  </p>
+                  
+                  {/* Stat */}
+                  <div className="pt-4 border-t border-border/50">
+                    <div className="text-2xl font-display font-bold text-warning">
+                      {point.stat}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {point.statLabel}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </GlassCard>
+              </GlassCard>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   )

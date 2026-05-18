@@ -119,8 +119,8 @@ function AuroraShader() {
       float vignette = 1.0 - length(p) * 0.4;
       vignette = clamp(vignette, 0.0, 1.0);
       
-      // Combine with background
-      vec3 finalColor = mix(bgColor, auroraColor, vignette * 0.7);
+      // Combine with background - reduced opacity (25-30%)
+      vec3 finalColor = mix(bgColor, auroraColor, vignette * 0.28);
       
       // Subtle color grading
       finalColor = pow(finalColor, vec3(0.95));
