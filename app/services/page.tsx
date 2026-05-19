@@ -5,13 +5,14 @@ import Link from 'next/link'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { GlassCard } from '@/components/glass-card'
+import { PRICING } from '@/lib/constants'
 
 const services = [
   {
     id: 'cicd',
     name: 'CI/CD Setup',
-    price: '$4,500',
-    timeline: '1-2 weeks',
+    price: PRICING.CICD.price,
+    timeline: PRICING.CICD.timeline,
     description: 'Complete CI/CD pipeline with automated testing, security scanning, and deployment workflows.',
     features: [
       { feature: 'GitHub Actions / GitLab CI setup', included: true },
@@ -28,8 +29,8 @@ const services = [
   {
     id: 'infrastructure',
     name: 'Infrastructure Setup',
-    price: '$12,000',
-    timeline: '2-3 weeks',
+    price: PRICING.INFRASTRUCTURE.price,
+    timeline: PRICING.INFRASTRUCTURE.timeline,
     description: 'Production-ready Kubernetes infrastructure with monitoring, security, and cost optimization.',
     features: [
       { feature: 'GitHub Actions / GitLab CI setup', included: true },
@@ -47,8 +48,8 @@ const services = [
   {
     id: 'retainer',
     name: 'Monthly Retainer',
-    price: '$3,500',
-    timeline: '/month',
+    price: PRICING.RETAINER.price,
+    timeline: PRICING.RETAINER.timeline,
     description: 'Ongoing infrastructure support, optimization, and incident response with guaranteed SLA.',
     features: [
       { feature: 'Infrastructure maintenance', included: true },

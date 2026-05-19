@@ -20,7 +20,7 @@ const steps = [
     number: '03',
     title: 'Production-Ready Delivery',
     description: 'We implement, document, and hand over a battle-tested infrastructure. Your team gets full training and ongoing support.',
-    duration: '1-3 weeks',
+    duration: '7-14 days',
   },
 ]
 
@@ -49,7 +49,7 @@ export function HowItWorksSection() {
             How it works
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            From audit to production in weeks, not months. Our streamlined process gets your infrastructure shipping fast.
+            From audit to production in days, not months. Our streamlined process gets your infrastructure shipping fast.
           </p>
         </motion.div>
 
