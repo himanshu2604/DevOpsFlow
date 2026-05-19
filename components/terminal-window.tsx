@@ -4,10 +4,10 @@ import { useEffect, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const deploymentLines = [
-  { text: '$ git push origin main', type: 'command' },
+  { text: 'git push origin main', type: 'command' },
   { text: '✓ Triggered: GitHub Actions CI', type: 'success' },
   { text: '✓ Docker build: 47s', type: 'success' },
-  { text: '✓ Trivy scan: 0 critical', type: 'success' },
+  { text: '✓ Trivy scan: 0 critical, 0 high', type: 'success' },
   { text: '✓ SonarQube: Quality Gate PASSED', type: 'success' },
   { text: '✓ ArgoCD sync: Healthy', type: 'success' },
   { text: '✓ Kubernetes rollout: Complete', type: 'success' },
@@ -16,7 +16,7 @@ const deploymentLines = [
 
 const TYPING_SPEED = 25
 const LINE_DELAY = 200
-const CYCLE_DURATION = 8000
+const CYCLE_DURATION = 10000
 
 export function TerminalWindow() {
   const [visibleLines, setVisibleLines] = useState<{ text: string; type: string; displayText: string }[]>([])
@@ -92,46 +92,35 @@ export function TerminalWindow() {
     return () => clearInterval(cycleTimer)
   }, [resetAnimation])
 
-  const getLineColor = (type: string) => {
+  const getLineStyles = (type: string) => {
     switch (type) {
       case 'command':
-        return 'text-foreground'
+        return 'text-white'
       case 'success':
-        return 'text-primary'
+        return 'text-[#00e5a0]'
       case 'deploy':
-        return 'text-[#00ff88]'
+        return 'text-[#00e5a0] font-bold'
       default:
-        return 'text-muted-foreground'
+        return 'text-gray-400'
     }
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20, rotateX: -10 }}
-      animate={{ opacity: 1, y: 0, rotateX: 0 }}
-      transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className="relative w-full max-w-md animate-float"
-      style={{ perspective: 1000 }}
-    >
-      {/* Glow effect behind terminal */}
-      <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 rounded-2xl blur-2xl opacity-50" />
-      
-      {/* Terminal window */}
-      <div className="relative glass rounded-xl overflow-hidden border border-border/50">
-        {/* Terminal header */}
-        <div className="flex items-center gap-2 px-4 py-3 bg-[#0a0a12] border-b border-border/50">
+    <div className="relative group">
+      <div className="absolute -inset-1 bg-gradient-to-r from-[#00e5a0]/20 to-[#00e5a0]/0 rounded-xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+      <div className="relative bg-[#0a0a0a] rounded-lg border border-[#1a1a1a] overflow-hidden shadow-2xl">
+        {/* Terminal Header */}
+        <div className="flex items-center justify-between px-4 py-2 bg-[#141414] border-b border-[#1a1a1a]">
           <div className="flex gap-1.5">
-            <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
-            <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
-            <div className="w-3 h-3 rounded-full bg-[#27ca40]" />
+            <div className="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
+            <div className="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
+            <div className="w-3 h-3 rounded-full bg-[#27c93f]"></div>
           </div>
-          <span className="text-xs text-muted-foreground font-mono ml-2">
-            ~/devopsflow/deploy
-          </span>
+          <div className="text-[10px] text-gray-500 font-mono select-none">~/devopsflow/deploy</div>
         </div>
-        
-        {/* Terminal content */}
-        <div className="p-4 min-h-[240px] bg-[#050508]/80">
+
+        {/* Terminal Body */}
+        <div className="p-6 font-mono text-sm min-h-[300px]">
           <AnimatePresence mode="wait">
             {isVisible && (
               <motion.div
@@ -143,16 +132,17 @@ export function TerminalWindow() {
               >
                 {visibleLines.map((line, index) => (
                   <motion.div
-                    key={index}
+                    key={`${index}-${line.type}`}
                     initial={{ opacity: 0, x: -5 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.2 }}
-                    className={`font-mono text-sm ${getLineColor(line.type)}`}
+                    className={`${getLineStyles(line.type)}`}
                   >
+                    {line.type === 'command' && <span className="text-white mr-2">$</span>}
                     <span>{line.displayText}</span>
                     {index === visibleLines.length - 1 && 
                      line.displayText.length < deploymentLines[index]?.text.length && (
-                      <span className="inline-block w-2 h-4 bg-primary ml-0.5 animate-pulse align-middle" />
+                      <span className="inline-block w-2 h-4 bg-[#00e5a0] ml-0.5 animate-pulse align-middle" />
                     )}
                   </motion.div>
                 ))}
@@ -161,6 +151,6 @@ export function TerminalWindow() {
           </AnimatePresence>
         </div>
       </div>
-    </motion.div>
+    </div>
   )
 }

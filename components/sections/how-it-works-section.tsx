@@ -2,6 +2,7 @@
 
 import { motion, useInView } from 'framer-motion'
 import { useRef } from 'react'
+import { PRICING } from '@/lib/constants'
 
 const steps = [
   {
@@ -20,7 +21,7 @@ const steps = [
     number: '03',
     title: 'Production-Ready Delivery',
     description: 'We implement, document, and hand over a battle-tested infrastructure. Your team gets full training and ongoing support.',
-    duration: '10-14 days',
+    duration: PRICING.INFRASTRUCTURE.timeline,
   },
 ]
 

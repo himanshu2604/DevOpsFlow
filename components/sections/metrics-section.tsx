@@ -3,6 +3,7 @@
 import { motion, useInView, animate, useMotionValue, useTransform } from 'framer-motion'
 import { useRef, useState, useEffect } from 'react'
 import { GlassCard } from '@/components/glass-card'
+import { PRICING } from '@/lib/constants'
 
 const stats = [
   {
@@ -24,7 +25,7 @@ const stats = [
     description: 'After cost optimization',
   },
   {
-    value: '10-14',
+    value: PRICING.INFRASTRUCTURE.timeline.split(' ')[0],
     suffix: ' days',
     label: 'Average delivery time',
     description: 'For full infrastructure setup',

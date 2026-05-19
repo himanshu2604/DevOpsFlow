@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { GlassCard } from '@/components/glass-card'
+import { PRICING } from '@/lib/constants'
 
 const projects = [
   {
@@ -24,7 +25,7 @@ const projects = [
     metrics: [
       { label: 'Uptime', value: '99.95%' },
       { label: 'Monthly AWS Cost', value: '-42%' },
-      { label: 'Time to Market', value: '10-14 days' },
+      { label: 'Time to Market', value: PRICING.INFRASTRUCTURE.timeline },
     ],
     techStack: ['AWS EKS', 'Terraform', 'Prometheus', 'Grafana', 'Loki'],
     gradient: 'from-secondary/20 to-purple-500/20',
