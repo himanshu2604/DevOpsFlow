@@ -22,6 +22,7 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://devopsflow.vercel.app'),
   title: {
     default: 'DevOpsFlow | Elite Infrastructure for Fast-Moving Startups',
     template: '%s | DevOpsFlow',
@@ -30,10 +31,13 @@ export const metadata: Metadata = {
   keywords: ['DevOps', 'Infrastructure', 'Kubernetes', 'AWS', 'CI/CD', 'Cloud', 'Startup', 'YC', 'GitOps', 'Terraform'],
   authors: [{ name: 'DevOpsFlow' }],
   creator: 'DevOpsFlow',
+  alternates: {
+    canonical: 'https://devopsflow.vercel.app',
+  },
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://devopsflow.io',
+    url: 'https://devopsflow.vercel.app',
     siteName: 'DevOpsFlow',
     title: 'DevOpsFlow | Elite Infrastructure for Fast-Moving Startups',
     description: 'Industrial-grade DevOps infrastructure for YC-backed startups. Ship faster, scale confidently.',

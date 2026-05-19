@@ -1,8 +1,9 @@
 'use client'
 
-import { motion, useInView } from 'framer-motion'
+import { motion, useInView, animate, useMotionValue, useTransform } from 'framer-motion'
 import { useRef, useState, useEffect } from 'react'
 import { GlassCard } from '@/components/glass-card'
+import { PRICING } from '@/lib/constants'
 
 const stats = [
   {
@@ -24,7 +25,7 @@ const stats = [
     description: 'After cost optimization',
   },
   {
-    value: '10',
+    value: PRICING.INFRASTRUCTURE.timeline.split(' ')[0],
     suffix: ' days',
     label: 'Average delivery time',
     description: 'For full infrastructure setup',
@@ -48,45 +49,49 @@ const testimonials = [
 
 function AnimatedNumber({ value, suffix }: { value: string; suffix: string }) {
   const ref = useRef(null)
-  const isInView = useInView(ref, { once: true })
-  const [displayValue, setDisplayValue] = useState('0')
+  const isInView = useInView(ref, { once: true, margin: "-50px" })
+
+  // Extract prefix and numeric value once
+  const prefixMatch = value.match(/^[^0-9.]+/)
+  const prefix = prefixMatch ? prefixMatch[0] : ''
+
+  // Handle ranges (e.g., "10-14") by animating to the upper bound
+  const numericString = value.split('-').pop()?.replace(/[^0-9.]/g, '') || '0'
+  const numericValue = parseFloat(numericString)
+  const isDecimal = value.includes('.')
+
+  const count = useMotionValue(0)
+  const displayValue = useTransform(count, (latest) => {
+    if (latest >= numericValue) return value
+
+    if (isDecimal) {
+      return prefix + latest.toFixed(1)
+    }
+    return prefix + Math.round(latest).toLocaleString()
+  })
+
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    if (!isInView) return
+    setMounted(true)
+  }, [])
 
-    const numericValue = parseFloat(value.replace(/[^0-9.]/g, ''))
-    const isDecimal = value.includes('.')
-    const hasPrefix = value.includes('$') || value.includes('<')
-    const prefix = value.includes('$') ? '$' : value.includes('<') ? '< ' : ''
-    
-    let start = 0
-    const duration = 1500
-    const startTime = performance.now()
-
-    const animate = (currentTime: number) => {
-      const elapsed = currentTime - startTime
-      const progress = Math.min(elapsed / duration, 1)
-      const easeProgress = 1 - Math.pow(1 - progress, 3) // ease-out-cubic
-      
-      const current = start + (numericValue - start) * easeProgress
-      
-      if (isDecimal) {
-        setDisplayValue(prefix + current.toFixed(1))
-      } else {
-        setDisplayValue(prefix + Math.round(current).toLocaleString())
-      }
-
-      if (progress < 1) {
-        requestAnimationFrame(animate)
-      }
+  useEffect(() => {
+    if (mounted && isInView) {
+      animate(count, numericValue, {
+        duration: 1.5,
+        ease: "easeOut",
+      })
     }
-
-    requestAnimationFrame(animate)
-  }, [isInView, value])
+  }, [isInView, mounted, count, numericValue])
 
   return (
-    <span ref={ref} className="text-4xl md:text-5xl font-display font-bold text-foreground">
-      {displayValue}
+    <span ref={ref} className="text-4xl md:text-5xl font-display font-bold text-foreground inline-block">
+      {mounted ? (
+        <motion.span>{displayValue}</motion.span>
+      ) : (
+        <span>{value}</span>
+      )}
       <span className="text-primary">{suffix}</span>
     </span>
   )

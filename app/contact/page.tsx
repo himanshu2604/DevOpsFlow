@@ -23,6 +23,7 @@ export default function ContactPage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const validateForm = () => {
@@ -60,12 +61,31 @@ export default function ContactPage() {
     if (!validateForm()) return
     
     setIsSubmitting(true)
+    setError(null)
     
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-    
-    setIsSubmitting(false)
-    setIsSubmitted(true)
+    try {
+      const response = await fetch('https://formspree.io/f/mqakpzoz', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          ...formState,
+          _replyto: formState.email
+        })
+      })
+
+      if (response.ok) {
+        setIsSubmitted(true)
+      } else {
+        setError('Transmission failed. Please email directly at hello@devopsflow.io')
+      }
+    } catch (err) {
+      setError('Transmission failed. Please email directly at hello@devopsflow.io')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -74,6 +94,7 @@ export default function ContactPage() {
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }))
     }
+    if (error) setError(null)
   }
 
   return (
@@ -138,10 +159,10 @@ export default function ContactPage() {
                         </svg>
                       </motion.div>
                       <h2 className="text-2xl font-display font-bold text-foreground mb-4">
-                        Message received!
+                        Request deployed.
                       </h2>
                       <p className="text-muted-foreground mb-6">
-                        We&apos;ll review your request and get back to you within 24 hours with next steps.
+                        We&apos;ll respond within 2 hours.
                       </p>
                       <button
                         onClick={() => {
@@ -164,6 +185,15 @@ export default function ContactPage() {
                   >
                     <GlassCard className="p-8 md:p-12">
                       <form onSubmit={handleSubmit} className="space-y-6">
+                        {error && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            className="p-4 rounded-lg bg-destructive/10 border border-destructive text-destructive text-sm"
+                          >
+                            {error}
+                          </motion.div>
+                        )}
                         <div className="grid md:grid-cols-2 gap-6">
                           {/* Name */}
                           <div>
@@ -178,6 +208,7 @@ export default function ContactPage() {
                               onChange={handleChange}
                               className={`w-full px-4 py-3 bg-card border ${errors.name ? 'border-destructive' : 'border-border'} rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary transition-colors`}
                               placeholder="John Doe"
+                              required
                             />
                             {errors.name && (
                               <motion.p
@@ -203,6 +234,7 @@ export default function ContactPage() {
                               onChange={handleChange}
                               className={`w-full px-4 py-3 bg-card border ${errors.email ? 'border-destructive' : 'border-border'} rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary transition-colors`}
                               placeholder="john@startup.com"
+                              required
                             />
                             {errors.email && (
                               <motion.p
@@ -229,6 +261,7 @@ export default function ContactPage() {
                             onChange={handleChange}
                             className={`w-full px-4 py-3 bg-card border ${errors.company ? 'border-destructive' : 'border-border'} rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary transition-colors`}
                             placeholder="Acme Inc"
+                            required
                           />
                           {errors.company && (
                             <motion.p
@@ -252,6 +285,7 @@ export default function ContactPage() {
                             value={formState.service}
                             onChange={handleChange}
                             className={`w-full px-4 py-3 bg-card border ${errors.service ? 'border-destructive' : 'border-border'} rounded-lg text-foreground focus:outline-none focus:border-primary transition-colors appearance-none cursor-pointer`}
+                            required
                           >
                             <option value="" disabled>Select a service</option>
                             {services.map((service) => (
@@ -284,6 +318,7 @@ export default function ContactPage() {
                             rows={5}
                             className={`w-full px-4 py-3 bg-card border ${errors.message ? 'border-destructive' : 'border-border'} rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary transition-colors resize-none`}
                             placeholder="Describe your current infrastructure setup and what you're looking to improve..."
+                            required
                           />
                           {errors.message && (
                             <motion.p
@@ -345,7 +380,7 @@ export default function ContactPage() {
                   <div className="space-y-3 font-mono text-sm">
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">Response Time</span>
-                      <span className="text-primary">&lt; 24h</span>
+                      <span className="text-primary">&lt; 2h</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">Availability</span>
