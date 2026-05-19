@@ -5,9 +5,9 @@ import Link from 'next/link'
 
 const footerLinks = {
   company: [
-    { label: 'About', href: '/about' },
-    { label: 'Blog', href: '/blog' },
-    { label: 'Careers', href: '/careers' },
+    { label: 'Services', href: '/#services' },
+    { label: 'How It Works', href: '/#how-it-works' },
+    { label: 'Portfolio', href: '/#portfolio' },
     { label: 'Contact', href: '/contact' },
   ],
   services: [
@@ -17,10 +17,9 @@ const footerLinks = {
     { label: 'Free Audit', href: '/contact' },
   ],
   resources: [
-    { label: 'Documentation', href: '/docs' },
-    { label: 'Case Studies', href: '/#portfolio' },
-    { label: 'Tech Stack', href: '/stack' },
-    { label: 'Status', href: '/status' },
+    { label: 'GitHub', href: 'https://github.com' },
+    { label: 'LinkedIn', href: 'https://linkedin.com' },
+    { label: 'Book Free Audit', href: '/contact' },
   ],
 }
 
