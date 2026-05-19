@@ -24,7 +24,7 @@ const projects = [
     metrics: [
       { label: 'Uptime', value: '99.95%' },
       { label: 'Monthly AWS Cost', value: '-42%' },
-      { label: 'Time to Market', value: '14 days' },
+      { label: 'Time to Market', value: '10-14 days' },
     ],
     techStack: ['AWS EKS', 'Terraform', 'Prometheus', 'Grafana', 'Loki'],
     gradient: 'from-secondary/20 to-purple-500/20',

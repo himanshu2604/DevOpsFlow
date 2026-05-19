@@ -20,7 +20,7 @@ const steps = [
     number: '03',
     title: 'Production-Ready Delivery',
     description: 'We implement, document, and hand over a battle-tested infrastructure. Your team gets full training and ongoing support.',
-    duration: '7-14 days',
+    duration: '10-14 days',
   },
 ]
 

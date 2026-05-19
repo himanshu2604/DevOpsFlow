@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, useInView } from 'framer-motion'
+import { motion, useInView, animate, useMotionValue, useTransform } from 'framer-motion'
 import { useRef, useState, useEffect } from 'react'
 import { GlassCard } from '@/components/glass-card'
 
@@ -24,7 +24,7 @@ const stats = [
     description: 'After cost optimization',
   },
   {
-    value: '10',
+    value: '10-14',
     suffix: ' days',
     label: 'Average delivery time',
     description: 'For full infrastructure setup',
@@ -48,62 +48,49 @@ const testimonials = [
 
 function AnimatedNumber({ value, suffix }: { value: string; suffix: string }) {
   const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: "-100px" })
+  const isInView = useInView(ref, { once: true, margin: "-50px" })
 
   // Extract prefix and numeric value once
   const prefixMatch = value.match(/^[^0-9.]+/)
   const prefix = prefixMatch ? prefixMatch[0] : ''
-  const numericValue = parseFloat(value.replace(/[^0-9.]/g, ''))
+
+  // Handle ranges (e.g., "10-14") by animating to the upper bound
+  const numericString = value.split('-').pop()?.replace(/[^0-9.]/g, '') || '0'
+  const numericValue = parseFloat(numericString)
   const isDecimal = value.includes('.')
 
-  // Start with target value for SSR to ensure SEO and hydration match
-  const [displayValue, setDisplayValue] = useState(value)
-  const [hasAnimated, setHasAnimated] = useState(false)
+  const count = useMotionValue(0)
+  const displayValue = useTransform(count, (latest) => {
+    if (latest >= numericValue) return value
+
+    if (isDecimal) {
+      return prefix + latest.toFixed(1)
+    }
+    return prefix + Math.round(latest).toLocaleString()
+  })
+
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    if (!isInView || hasAnimated) {
-      // If not in view, and it's the first mount, we want to set it to 0
-      // but doing it immediately causes flicker.
-      // However, we only need to set it to 0 if we haven't animated yet.
-      if (!hasAnimated && !isInView) {
-        setDisplayValue(prefix + "0")
-      }
-      return
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (mounted && isInView) {
+      animate(count, numericValue, {
+        duration: 1.5,
+        ease: "easeOut",
+      })
     }
-
-    setHasAnimated(true)
-    let animationFrame: number
-    const duration = 1500
-    const startTime = performance.now()
-
-    const animate = (currentTime: number) => {
-      const elapsed = currentTime - startTime
-      const progress = Math.min(elapsed / duration, 1)
-      const easeProgress = 1 - Math.pow(1 - progress, 3) // ease-out-cubic
-      
-      const current = numericValue * easeProgress
-      
-      if (isDecimal) {
-        setDisplayValue(prefix + current.toFixed(1))
-      } else {
-        setDisplayValue(prefix + Math.round(current).toLocaleString())
-      }
-
-      if (progress < 1) {
-        animationFrame = requestAnimationFrame(animate)
-      }
-    }
-
-    animationFrame = requestAnimationFrame(animate)
-
-    return () => {
-      if (animationFrame) cancelAnimationFrame(animationFrame)
-    }
-  }, [isInView, value, hasAnimated, prefix, numericValue, isDecimal])
+  }, [isInView, mounted, count, numericValue])
 
   return (
     <span ref={ref} className="text-4xl md:text-5xl font-display font-bold text-foreground inline-block">
-      {displayValue}
+      {mounted ? (
+        <motion.span>{displayValue}</motion.span>
+      ) : (
+        <span>{value}</span>
+      )}
       <span className="text-primary">{suffix}</span>
     </span>
   )
