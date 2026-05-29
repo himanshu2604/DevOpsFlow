@@ -59,7 +59,7 @@ export function PortfolioSection() {
         </motion.div>
 
         {/* Project cards */}
-        <div className="grid lg:grid-cols-2 gap-8 lg:items-stretch">
+        <div className="grid lg:grid-cols-2 gap-8 xl:items-stretch">
           {projects.map((project, index) => (
             <motion.div
               key={project.title}
@@ -67,9 +67,9 @@ export function PortfolioSection() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className="lg:h-full"
+              className="xl:h-full"
             >
-              <GlassCard className="overflow-hidden lg:h-full group">
+              <GlassCard className="overflow-hidden xl:h-full group">
                 <div className="flex flex-col h-full">
                   {/* Gradient header */}
                   <div className={`h-2 bg-gradient-to-r ${project.gradient}`} />

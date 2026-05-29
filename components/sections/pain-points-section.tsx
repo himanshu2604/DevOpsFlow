@@ -93,16 +93,16 @@ export function PainPointsSection() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: '-50px' }}
-          className="grid md:grid-cols-3 gap-6 lg:gap-8 lg:items-stretch"
+          className="grid md:grid-cols-3 gap-6 lg:gap-8 xl:items-stretch"
         >
           {painPoints.map((point) => (
-            <motion.div key={point.title} variants={cardVariants} className="lg:h-full">
+            <motion.div key={point.title} variants={cardVariants} className="xl:h-full">
               <GlassCard
                 delay={0}
-                className="p-8 hover:border-primary/30 transition-colors duration-300 lg:h-full"
+                className="p-8 hover:border-primary/30 transition-colors duration-300 xl:h-full"
               >
-                <div className="flex flex-col h-full lg:justify-between">
-                  <div className="space-y-6 mb-8">
+                <div className="flex flex-col h-full xl:justify-between">
+                  <div className="flex-1 space-y-6 mb-8">
                     {/* Icon */}
                     <div className="text-primary">
                       {point.icon}

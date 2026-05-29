@@ -9,6 +9,8 @@ const services = [
   {
     name: 'CI/CD Setup',
     price: PRICING.CICD.price,
+    originalPrice: PRICING.CICD.originalPrice,
+    discount: PRICING.CICD.discount,
     timeline: PRICING.CICD.timeline,
     description: 'Complete CI/CD pipeline with automated testing, security scanning, and deployment.',
     features: [
@@ -24,6 +26,8 @@ const services = [
   {
     name: 'Infrastructure Setup',
     price: PRICING.INFRASTRUCTURE.price,
+    originalPrice: PRICING.INFRASTRUCTURE.originalPrice,
+    discount: PRICING.INFRASTRUCTURE.discount,
     timeline: PRICING.INFRASTRUCTURE.timeline,
     description: 'Production-ready Kubernetes infrastructure with monitoring and security best practices.',
     features: [
@@ -42,6 +46,8 @@ const services = [
   {
     name: 'Monthly Retainer',
     price: PRICING.RETAINER.price,
+    originalPrice: PRICING.RETAINER.originalPrice,
+    discount: PRICING.RETAINER.discount,
     timeline: PRICING.RETAINER.timeline,
     description: 'Ongoing infrastructure support, optimization, and 24/7 incident response.',
     features: [
@@ -88,8 +94,24 @@ export function ServicesSection() {
           </p>
         </motion.div>
 
+        {/* Launch Banner */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          viewport={{ once: true }}
+          className="max-w-fit mx-auto mb-12"
+        >
+          <div className="bg-amber-500/10 border border-amber-500/20 rounded-full px-6 py-2 flex items-center gap-2">
+            <span className="text-amber-500 text-lg">🚀</span>
+            <span className="text-amber-200/90 font-medium text-sm md:text-base">
+              Early-bird Launch Pricing: <span className="text-amber-500 font-bold">Limited to first 5 clients</span>
+            </span>
+          </div>
+        </motion.div>
+
         {/* Service cards */}
-        <div className="grid lg:grid-cols-3 gap-6 lg:gap-8 lg:items-stretch">
+        <div className="grid lg:grid-cols-3 gap-6 lg:gap-8 xl:items-stretch">
           {services.map((service, index) => (
             <motion.div
               key={service.name}
@@ -97,36 +119,49 @@ export function ServicesSection() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className={`relative ${service.highlighted ? 'lg:-mt-4 lg:mb-[-16px]' : ''} lg:h-full`}
+              className={`relative ${service.highlighted ? 'lg:-translate-y-4' : ''} xl:h-full`}
             >
               {/* Badge for highlighted card */}
               {service.badge && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-                  <span className="px-4 py-1 bg-secondary text-secondary-foreground text-xs font-bold rounded-full whitespace-nowrap">
+                  <span className="px-4 py-1 bg-amber-500 text-black text-xs font-bold rounded-full whitespace-nowrap shadow-lg shadow-amber-500/20">
                     {service.badge}
                   </span>
                 </div>
               )}
               
-              <div className={`h-full rounded-2xl overflow-hidden ${
+              <div className={`xl:h-full rounded-2xl overflow-hidden ${
                 service.highlighted 
                   ? 'bg-card border-2 border-secondary glow-secondary' 
                   : 'glass border border-border/50 hover:border-primary/30'
               } transition-all duration-300`}>
-                <div className="p-8 flex flex-col h-full lg:justify-between">
+                <div className="p-8 flex flex-col h-full xl:justify-between">
                   <div>
                     {/* Header */}
                     <div className="mb-6">
                       <h3 className="text-xl font-display font-semibold text-foreground mb-2">
                         {service.name}
                       </h3>
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-4xl font-display font-bold text-foreground">
-                          {service.price}
-                        </span>
-                        <span className="text-muted-foreground">
-                          {service.timeline}
-                        </span>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            Regular price:
+                          </span>
+                          <span className="text-sm text-muted-foreground line-through decoration-destructive/50">
+                            {service.originalPrice}
+                          </span>
+                          <span className="px-2 py-0.5 bg-amber-500/10 text-amber-500 text-[10px] font-bold rounded flex items-center">
+                            {service.discount}
+                          </span>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-4xl font-display font-bold text-foreground">
+                            {service.price}
+                          </span>
+                          <span className="text-muted-foreground text-sm font-medium">
+                            {service.timeline}
+                          </span>
+                        </div>
                       </div>
                     </div>
 
@@ -149,7 +184,7 @@ export function ServicesSection() {
                   </div>
                   
                   {/* CTA */}
-                  <div className="lg:mt-auto">
+                  <div className="xl:mt-auto">
                     <Link
                       href="/contact"
                       className={`w-full inline-flex items-center justify-center gap-2 px-6 py-3 font-semibold text-sm rounded-lg transition-all duration-200 ${
