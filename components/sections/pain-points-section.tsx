@@ -67,7 +67,7 @@ export function PainPointsSection() {
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-card/30 to-background" />
       
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 xl:px-6">
         {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -93,29 +93,31 @@ export function PainPointsSection() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: '-50px' }}
-          className="grid md:grid-cols-3 gap-6 lg:gap-8"
+          className="grid md:grid-cols-3 gap-6 lg:gap-8 xl:items-stretch"
         >
           {painPoints.map((point) => (
-            <motion.div key={point.title} variants={cardVariants}>
+            <motion.div key={point.title} variants={cardVariants} className="xl:h-full">
               <GlassCard
                 delay={0}
-                className="p-8 hover:border-primary/30 transition-colors duration-300 h-full"
+                className="p-8 hover:border-primary/30 transition-colors duration-300 xl:h-full"
               >
-                <div className="space-y-6">
-                  {/* Icon */}
-                  <div className="text-primary">
-                    {point.icon}
+                <div className="flex flex-col h-full xl:justify-between">
+                  <div className="flex-1 space-y-6 mb-8">
+                    {/* Icon */}
+                    <div className="text-primary">
+                      {point.icon}
+                    </div>
+
+                    {/* Title */}
+                    <h3 className="text-xl font-display font-semibold text-foreground">
+                      {point.title}
+                    </h3>
+
+                    {/* Description */}
+                    <p className="text-muted-foreground leading-relaxed">
+                      {point.description}
+                    </p>
                   </div>
-                  
-                  {/* Title */}
-                  <h3 className="text-xl font-display font-semibold text-foreground">
-                    {point.title}
-                  </h3>
-                  
-                  {/* Description */}
-                  <p className="text-muted-foreground leading-relaxed">
-                    {point.description}
-                  </p>
                   
                   {/* Stat */}
                   <div className="pt-4 border-t border-border/50">

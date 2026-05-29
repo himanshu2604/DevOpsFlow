@@ -38,7 +38,7 @@ export function PortfolioSection() {
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-card/20 to-background" />
       
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 xl:px-6">
         {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -59,7 +59,7 @@ export function PortfolioSection() {
         </motion.div>
 
         {/* Project cards */}
-        <div className="grid lg:grid-cols-2 gap-8">
+        <div className="grid lg:grid-cols-2 gap-8 xl:items-stretch">
           {projects.map((project, index) => (
             <motion.div
               key={project.title}
@@ -67,63 +67,68 @@ export function PortfolioSection() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
               viewport={{ once: true }}
+              className="xl:h-full"
             >
-              <GlassCard className="overflow-hidden h-full group">
-                {/* Gradient header */}
-                <div className={`h-2 bg-gradient-to-r ${project.gradient}`} />
-                
-                <div className="p-8">
-                  {/* Header */}
-                  <div className="mb-6">
-                    <span className="text-sm text-primary font-mono mb-2 block">
-                      {project.client}
-                    </span>
-                    <h3 className="text-2xl font-display font-bold text-foreground">
-                      {project.title}
-                    </h3>
-                  </div>
+              <GlassCard className="overflow-hidden xl:h-full group">
+                <div className="flex flex-col h-full">
+                  {/* Gradient header */}
+                  <div className={`h-2 bg-gradient-to-r ${project.gradient}`} />
 
-                  {/* Description */}
-                  <p className="text-muted-foreground leading-relaxed mb-6">
-                    {project.description}
-                  </p>
-
-                  {/* Metrics */}
-                  <div className="grid grid-cols-3 gap-4 mb-6 py-6 border-t border-b border-border/50">
-                    {project.metrics.map((metric) => (
-                      <div key={metric.label}>
-                        <div className="text-lg font-display font-bold text-primary">
-                          {metric.value}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {metric.label}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Tech stack */}
-                  <div className="flex flex-wrap gap-2 mb-6">
-                    {project.techStack.map((tech) => (
-                      <span
-                        key={tech}
-                        className="px-3 py-1 text-xs font-mono bg-card border border-border rounded-full text-muted-foreground"
-                      >
-                        {tech}
+                  <div className="p-8 flex flex-col flex-1">
+                    {/* Header */}
+                    <div className="mb-6">
+                      <span className="text-sm text-primary font-mono mb-2 block">
+                        {project.client}
                       </span>
-                    ))}
-                  </div>
+                      <h3 className="text-2xl font-display font-bold text-foreground">
+                        {project.title}
+                      </h3>
+                    </div>
 
-                  {/* CTA */}
-                  <Link
-                    href="/contact"
-                    className="inline-flex items-center gap-2 text-primary font-medium hover:gap-3 transition-all duration-200 group"
-                  >
-                    Discuss your project
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
-                  </Link>
+                    {/* Description */}
+                    <p className="text-muted-foreground leading-relaxed mb-6">
+                      {project.description}
+                    </p>
+
+                    {/* Metrics */}
+                    <div className="grid grid-cols-3 gap-4 mb-6 py-6 border-t border-b border-border/50">
+                      {project.metrics.map((metric) => (
+                        <div key={metric.label}>
+                          <div className="text-lg font-display font-bold text-primary">
+                            {metric.value}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {metric.label}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Tech stack */}
+                    <div className="flex flex-wrap gap-2 mb-6">
+                      {project.techStack.map((tech) => (
+                        <span
+                          key={tech}
+                          className="px-3 py-1 text-xs font-mono bg-card border border-border rounded-full text-muted-foreground"
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* CTA */}
+                    <div className="mt-auto">
+                      <Link
+                        href="/contact"
+                        className="inline-flex items-center gap-2 text-primary font-medium hover:gap-3 transition-all duration-200 group"
+                      >
+                        Discuss your project
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                        </svg>
+                      </Link>
+                    </div>
+                  </div>
                 </div>
               </GlassCard>
             </motion.div>
