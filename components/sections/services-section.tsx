@@ -89,7 +89,7 @@ export function ServicesSection() {
         </motion.div>
 
         {/* Service cards */}
-        <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
+        <div className="grid lg:grid-cols-3 gap-6 lg:gap-8 lg:items-stretch">
           {services.map((service, index) => (
             <motion.div
               key={service.name}
@@ -97,7 +97,7 @@ export function ServicesSection() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className={`relative ${service.highlighted ? 'lg:-mt-4 lg:mb-[-16px]' : ''}`}
+              className={`relative ${service.highlighted ? 'lg:-mt-4 lg:mb-[-16px]' : ''} lg:h-full`}
             >
               {/* Badge for highlighted card */}
               {service.badge && (
@@ -113,53 +113,57 @@ export function ServicesSection() {
                   ? 'bg-card border-2 border-secondary glow-secondary' 
                   : 'glass border border-border/50 hover:border-primary/30'
               } transition-all duration-300`}>
-                <div className="p-8">
-                  {/* Header */}
-                  <div className="mb-6">
-                    <h3 className="text-xl font-display font-semibold text-foreground mb-2">
-                      {service.name}
-                    </h3>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-4xl font-display font-bold text-foreground">
-                        {service.price}
-                      </span>
-                      <span className="text-muted-foreground">
-                        {service.timeline}
-                      </span>
+                <div className="p-8 flex flex-col h-full lg:justify-between">
+                  <div>
+                    {/* Header */}
+                    <div className="mb-6">
+                      <h3 className="text-xl font-display font-semibold text-foreground mb-2">
+                        {service.name}
+                      </h3>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-4xl font-display font-bold text-foreground">
+                          {service.price}
+                        </span>
+                        <span className="text-muted-foreground">
+                          {service.timeline}
+                        </span>
+                      </div>
                     </div>
+
+                    {/* Description */}
+                    <p className="text-muted-foreground mb-6 leading-relaxed">
+                      {service.description}
+                    </p>
+
+                    {/* Features */}
+                    <ul className="space-y-3 mb-8">
+                      {service.features.map((feature) => (
+                        <li key={feature} className="flex items-start gap-3">
+                          <svg className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span className="text-sm text-muted-foreground">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                   
-                  {/* Description */}
-                  <p className="text-muted-foreground mb-6 leading-relaxed">
-                    {service.description}
-                  </p>
-                  
-                  {/* Features */}
-                  <ul className="space-y-3 mb-8">
-                    {service.features.map((feature) => (
-                      <li key={feature} className="flex items-start gap-3">
-                        <svg className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                        <span className="text-sm text-muted-foreground">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  
                   {/* CTA */}
-                  <Link
-                    href="/contact"
-                    className={`w-full inline-flex items-center justify-center gap-2 px-6 py-3 font-semibold text-sm rounded-lg transition-all duration-200 ${
-                      service.highlighted
-                        ? 'bg-secondary text-secondary-foreground hover:bg-secondary/90'
-                        : 'bg-card border border-border hover:border-primary/50 text-foreground'
-                    }`}
-                  >
-                    Get Started
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
-                  </Link>
+                  <div className="lg:mt-auto">
+                    <Link
+                      href="/contact"
+                      className={`w-full inline-flex items-center justify-center gap-2 px-6 py-3 font-semibold text-sm rounded-lg transition-all duration-200 ${
+                        service.highlighted
+                          ? 'bg-secondary text-secondary-foreground hover:bg-secondary/90'
+                          : 'bg-card border border-border hover:border-primary/50 text-foreground'
+                      }`}
+                    >
+                      Get Started
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </Link>
+                  </div>
                 </div>
               </div>
             </motion.div>

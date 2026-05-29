@@ -10,9 +10,9 @@ export function CTASection() {
       <div className="absolute inset-0 bg-gradient-to-b from-background via-card/50 to-background" />
       
       {/* Animated beams */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden z-0">
         <motion.div
-          className="absolute top-1/2 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent"
+          className="absolute top-1/2 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"
           animate={{
             x: ['-100%', '100%'],
           }}
@@ -23,7 +23,7 @@ export function CTASection() {
           }}
         />
         <motion.div
-          className="absolute top-1/3 left-0 w-full h-px bg-gradient-to-r from-transparent via-secondary/30 to-transparent"
+          className="absolute top-1/3 left-0 w-full h-px bg-gradient-to-r from-transparent via-secondary/15 to-transparent"
           animate={{
             x: ['100%', '-100%'],
           }}
@@ -34,7 +34,7 @@ export function CTASection() {
           }}
         />
         <motion.div
-          className="absolute top-2/3 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
+          className="absolute top-2/3 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/15 to-transparent"
           animate={{
             x: ['-100%', '100%'],
           }}
@@ -50,7 +50,7 @@ export function CTASection() {
       {/* Glow orbs */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[128px]" />
       
-      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -75,7 +75,7 @@ export function CTASection() {
           </h2>
 
           {/* Subheadline */}
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
             Join the startups that ship with confidence. Let us handle the infrastructure 
             so you can focus on what matters—building your product.
           </p>
