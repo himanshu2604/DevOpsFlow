@@ -74,7 +74,7 @@ export function ServicesSection() {
         backgroundSize: '60px 60px',
       }} />
       
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 xl:px-6">
         {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -103,9 +103,8 @@ export function ServicesSection() {
           className="max-w-fit mx-auto mb-12"
         >
           <div className="bg-amber-500/10 border border-amber-500/20 rounded-full px-6 py-2 flex items-center gap-2">
-            <span className="text-amber-500 text-lg">🚀</span>
             <span className="text-amber-200/90 font-medium text-sm md:text-base">
-              Early-bird Launch Pricing: <span className="text-amber-500 font-bold">Limited to first 5 clients</span>
+              🎉 Launch pricing — Save up to $1,500 on your first project. Limited availability.
             </span>
           </div>
         </motion.div>

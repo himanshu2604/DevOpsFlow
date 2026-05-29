@@ -15,7 +15,7 @@ export function HeroSection() {
       </div>
       
       {/* Content */}
-      <div className="relative z-10 flex-1 flex flex-col w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8">
+      <div className="relative z-10 flex-1 flex flex-col w-full max-w-7xl mx-auto px-4 sm:px-6 xl:px-6 pt-24 pb-8">
         <div className="flex-1 grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
           {/* Left side - Text content */}
           <div className="space-y-8">
