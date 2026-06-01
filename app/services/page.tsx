@@ -5,6 +5,12 @@ import Link from 'next/link'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { GlassCard } from '@/components/glass-card'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion'
 import { PRICING } from '@/lib/constants'
 
 const services = [
@@ -224,7 +230,7 @@ export default function ServicesPage() {
             </h2>
           </motion.div>
 
-          <div className="space-y-4">
+          <Accordion type="single" collapsible className="w-full space-y-4">
             {faqs.map((faq, index) => (
               <motion.div
                 key={faq.question}
@@ -233,17 +239,23 @@ export default function ServicesPage() {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
               >
-                <GlassCard className="p-6">
-                  <h3 className="text-lg font-semibold text-foreground mb-2">
-                    {faq.question}
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {faq.answer}
-                  </p>
-                </GlassCard>
+                <AccordionItem value={`item-${index}`} className="border-none">
+                  <GlassCard className="p-0 overflow-hidden" spotlight={false}>
+                    <AccordionTrigger className="px-6 py-4 hover:no-underline group">
+                      <span className="text-lg font-semibold text-foreground text-left">
+                        {faq.question}
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent className="px-6 pb-6 pt-0 text-base">
+                      <p className="text-muted-foreground leading-relaxed">
+                        {faq.answer}
+                      </p>
+                    </AccordionContent>
+                  </GlassCard>
+                </AccordionItem>
               </motion.div>
             ))}
-          </div>
+          </Accordion>
         </div>
       </section>
 

@@ -107,8 +107,13 @@ export function TerminalWindow() {
 
   return (
     <div className="relative group">
-      <div className="absolute -inset-1 bg-gradient-to-r from-[#00e5a0]/20 to-[#00e5a0]/0 rounded-xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-      <div className="relative bg-[#0a0a0a] rounded-lg border border-[#1a1a1a] overflow-hidden shadow-2xl">
+      <div className="sr-only">
+        An animated terminal window showing a deployment process: pushing to main, triggering CI,
+        running Docker build and security scans, syncing with ArgoCD, and completing a
+        Kubernetes rollout.
+      </div>
+      <div className="absolute -inset-1 bg-gradient-to-r from-[#00e5a0]/20 to-[#00e5a0]/0 rounded-xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200" aria-hidden="true"></div>
+      <div className="relative bg-[#0a0a0a] rounded-lg border border-[#1a1a1a] overflow-hidden shadow-2xl" aria-hidden="true">
         {/* Terminal Header */}
         <div className="flex items-center justify-between px-4 py-2 bg-[#141414] border-b border-[#1a1a1a]">
           <div className="flex gap-1.5">
