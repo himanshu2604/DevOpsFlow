@@ -1,0 +1,3 @@
+## 2025-05-15 - [Decorative Animations and Information Density]
+**Learning:** Decorative terminal animations, while visually engaging, can be disruptive for screen reader users as they may attempt to read every typed character or line. Additionally, long lists of static FAQ cards increase cognitive load and vertical scroll fatigue on marketing pages.
+**Action:** Always mark purely decorative animations with `aria-hidden="true"` to ensure a cleaner accessibility tree. Use interactive patterns like Accordions (e.g., Radix UI) for FAQ sections to allow users to progressively disclose information, improving both accessibility and UX focus.
