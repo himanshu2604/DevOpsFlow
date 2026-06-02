@@ -1,7 +1,5 @@
 'use client'
 
-import { motion } from 'framer-motion'
-
 const techStack = [
   'AWS', 'Kubernetes', 'Terraform', 'Docker', 'ArgoCD', 
   'Prometheus', 'Grafana', 'Helm', 'Trivy', 'SonarQube',
@@ -15,7 +13,7 @@ export function TechMarquee() {
       <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-background to-transparent z-10" />
       <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-background to-transparent z-10" />
       
-      <div className="flex animate-marquee">
+      <div className="flex animate-marquee" style={{ willChange: 'transform' }}>
         {[...techStack, ...techStack].map((tech, index) => (
           <div
             key={`${tech}-${index}`}

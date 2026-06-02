@@ -48,6 +48,7 @@ export function AuroraBackground({ className = '' }: { className?: string }) {
             background: 'radial-gradient(ellipse at center, rgba(0, 230, 161, 0.25) 0%, rgba(0, 184, 212, 0.15) 40%, transparent 70%)',
             filter: 'blur(80px)',
             y: blob1Y,
+            willChange: 'transform', // Bolt: Promote to compositor layer for smoother animations
           }}
           animate={{
             x: [0, 40, -30, 20, 0],
@@ -67,6 +68,7 @@ export function AuroraBackground({ className = '' }: { className?: string }) {
             background: 'radial-gradient(ellipse at center, rgba(0, 184, 212, 0.2) 0%, rgba(16, 185, 129, 0.12) 50%, transparent 70%)',
             filter: 'blur(70px)',
             y: blob2Y,
+            willChange: 'transform', // Bolt: Promote to compositor layer for smoother animations
           }}
           animate={{
             x: [0, -50, 30, -20, 0],
@@ -86,6 +88,7 @@ export function AuroraBackground({ className = '' }: { className?: string }) {
             background: 'radial-gradient(ellipse at center, rgba(16, 185, 129, 0.18) 0%, rgba(0, 230, 161, 0.08) 60%, transparent 80%)',
             filter: 'blur(60px)',
             y: blob3Y,
+            willChange: 'transform', // Bolt: Promote to compositor layer for smoother animations
           }}
           animate={{
             x: [0, 60, -40, 30, 0],
@@ -104,6 +107,7 @@ export function AuroraBackground({ className = '' }: { className?: string }) {
           style={{
             background: 'radial-gradient(circle, rgba(0, 230, 161, 0.2) 0%, transparent 70%)',
             filter: 'blur(40px)',
+            willChange: 'transform, opacity', // Bolt: Particle also animates opacity
           }}
           animate={{
             x: [0, 40, -30, 0],
@@ -124,6 +128,7 @@ export function AuroraBackground({ className = '' }: { className?: string }) {
           style={{
             background: 'radial-gradient(circle, rgba(0, 184, 212, 0.25) 0%, transparent 70%)',
             filter: 'blur(35px)',
+            willChange: 'transform, opacity', // Bolt: Particle also animates opacity
           }}
           animate={{
             x: [0, -35, 45, 0],
@@ -144,6 +149,7 @@ export function AuroraBackground({ className = '' }: { className?: string }) {
           style={{
             background: 'radial-gradient(ellipse at center, rgba(0, 230, 161, 0.12) 0%, transparent 70%)',
             filter: 'blur(50px)',
+            willChange: 'transform', // Bolt: Promote to compositor layer for smoother animations
           }}
           animate={{
             x: [0, 30, -20, 0],
@@ -156,14 +162,8 @@ export function AuroraBackground({ className = '' }: { className?: string }) {
           }}
         />
       </motion.div>
-      
-      {/* Subtle noise texture */}
-      <div 
-        className="absolute inset-0 opacity-[0.02] pointer-events-none"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-        }}
-      />
+
+      {/* Bolt: Removed redundant noise texture (already in layout.tsx) */}
       
       {/* Vignette */}
       <div 
