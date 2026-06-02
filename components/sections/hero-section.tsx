@@ -8,7 +8,7 @@ import { TechMarquee } from '@/components/tech-marquee'
 
 export function HeroSection() {
   return (
-    <section className="relative min-h-screen flex flex-col">
+    <section id="hero" className="relative min-h-screen flex flex-col scroll-mt-20">
       {/* Aurora Background - with overflow visible to show full blobs */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         <AuroraBackground className="absolute inset-0" />

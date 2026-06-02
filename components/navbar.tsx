@@ -1,30 +1,69 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 const navLinks = [
-  { href: '/#services', label: 'Services' },
-  { href: '/#how-it-works', label: 'How It Works' },
-  { href: '/#portfolio', label: 'Portfolio' },
-  { href: '/contact', label: 'Contact' },
+  { href: '/#hero', label: 'Home', id: 'hero' },
+  { href: '/#services', label: 'Services', id: 'services' },
+  { href: '/#how-it-works', label: 'How It Works', id: 'how-it-works' },
+  { href: '/#portfolio', label: 'Portfolio', id: 'portfolio' },
+  { href: '/contact', label: 'Contact', id: 'contact' },
 ]
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [activeSection, setActiveSection] = useState('')
   const pathname = usePathname()
+  const { scrollYProgress } = useScroll()
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  })
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20)
+      setIsScrolled(window.scrollY > 50)
     }
     
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  useEffect(() => {
+    if (pathname !== '/') {
+      setActiveSection('')
+      return
+    }
+
+    const observerOptions = {
+      root: null,
+      rootMargin: '-80px 0px -40% 0px',
+      threshold: 0,
+    }
+
+    const observerCallback = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setActiveSection(entry.target.id)
+        }
+      })
+    }
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions)
+
+    const sectionIds = ['hero', 'services', 'how-it-works', 'portfolio']
+    sectionIds.forEach((id) => {
+      const element = document.getElementById(id)
+      if (element) observer.observe(element)
+    })
+
+    return () => observer.disconnect()
+  }, [pathname])
 
   useEffect(() => {
     if (isMobileMenuOpen) {
@@ -37,14 +76,36 @@ export function Navbar() {
     }
   }, [isMobileMenuOpen])
 
+  const handleNavLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href.startsWith('/#') && pathname === '/') {
+      e.preventDefault()
+      const id = href.replace('/#', '')
+      const element = document.getElementById(id)
+      if (element) {
+        setIsMobileMenuOpen(false)
+        element.scrollIntoView({ behavior: 'smooth' })
+      }
+    } else {
+      setIsMobileMenuOpen(false)
+    }
+  }
+
   return (
     <>
+      {/* Scroll Progress Bar */}
+      <motion.div
+        className="fixed top-0 left-0 right-0 h-[2px] bg-primary origin-left z-[60]"
+        style={{ scaleX, backgroundColor: '#00e5a0' }}
+      />
+
       <motion.header
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled ? 'glass-strong' : ''
+          isScrolled
+            ? 'bg-black/80 backdrop-blur-md border-b border-white/10'
+            : 'bg-transparent border-b border-transparent'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -62,16 +123,30 @@ export function Navbar() {
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-8">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="relative text-sm text-muted-foreground hover:text-foreground transition-colors duration-200 group"
-                >
-                  {link.label}
-                  <span className="absolute -bottom-1 left-0 w-0 h-px bg-primary group-hover:w-full transition-all duration-300" />
-                </Link>
-              ))}
+              {navLinks.map((link) => {
+                const isActive = activeSection === link.id || (pathname === link.href && !link.href.includes('#'))
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={(e) => handleNavLinkClick(e, link.href)}
+                    className={`relative text-sm transition-colors duration-200 group ${
+                      isActive ? 'text-white' : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    {link.label}
+                    <motion.span
+                      className="absolute -bottom-1 left-0 h-[2px] bg-primary"
+                      initial={false}
+                      animate={{
+                        width: isActive ? '100%' : '0%',
+                        backgroundColor: '#00e5a0'
+                      }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  </Link>
+                )
+              })}
             </div>
 
             {/* Desktop CTA */}
@@ -131,23 +206,37 @@ export function Navbar() {
               transition={{ duration: 0.3, delay: 0.1 }}
               className="relative h-full flex flex-col items-center justify-center gap-8"
             >
-              {navLinks.map((link, index) => (
-                <motion.div
-                  key={link.href}
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  exit={{ y: 20, opacity: 0 }}
-                  transition={{ duration: 0.3, delay: 0.1 + index * 0.05 }}
-                >
-                  <Link
-                    href={link.href}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="text-2xl font-display font-medium text-foreground hover:text-primary transition-colors"
+              {navLinks.map((link, index) => {
+                const isActive = activeSection === link.id || (pathname === link.href && !link.href.includes('#'))
+                return (
+                  <motion.div
+                    key={link.href}
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: 20, opacity: 0 }}
+                    transition={{ duration: 0.3, delay: 0.1 + index * 0.05 }}
                   >
-                    {link.label}
-                  </Link>
-                </motion.div>
-              ))}
+                    <Link
+                      href={link.href}
+                      onClick={(e) => handleNavLinkClick(e, link.href)}
+                      className={`relative text-2xl font-display font-medium transition-colors ${
+                        isActive ? 'text-white' : 'text-foreground hover:text-primary'
+                      }`}
+                    >
+                      {link.label}
+                      <motion.span
+                        className="absolute -bottom-1 left-0 h-[2px] bg-primary"
+                        initial={false}
+                        animate={{
+                          width: isActive ? '100%' : '0%',
+                          backgroundColor: '#00e5a0'
+                        }}
+                        transition={{ duration: 0.3 }}
+                      />
+                    </Link>
+                  </motion.div>
+                )
+              })}
               <motion.div
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}

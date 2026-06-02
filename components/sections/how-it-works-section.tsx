@@ -30,7 +30,7 @@ export function HowItWorksSection() {
   const isInView = useInView(containerRef, { once: true, margin: '-100px' })
 
   return (
-    <section id="how-it-works" className="relative py-24 overflow-hidden">
+    <section id="how-it-works" className="relative py-24 overflow-hidden scroll-mt-20">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-background to-card/30" />
       
