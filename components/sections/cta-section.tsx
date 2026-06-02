@@ -1,9 +1,18 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import Link from 'next/link'
 
 export function CTASection() {
+  const prefersReducedMotion = useReducedMotion()
+
+  const contentAnims = prefersReducedMotion ? {} : {
+    initial: { opacity: 0, y: 30 },
+    whileInView: { opacity: 1, y: 0 },
+    transition: { duration: 0.5, ease: "easeOut" },
+    viewport: { once: true, margin: "-100px" }
+  }
+
   return (
     <section className="relative py-24 overflow-hidden">
       {/* Background with beam effects */}
@@ -52,10 +61,7 @@ export function CTASection() {
       
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 xl:px-6 text-center">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
+          {...contentAnims}
           className="space-y-8"
         >
           {/* Badge */}

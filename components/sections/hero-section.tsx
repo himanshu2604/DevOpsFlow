@@ -1,14 +1,25 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import Link from 'next/link'
 import { AuroraBackground } from '@/components/aurora-background'
 import { TerminalWindow } from '@/components/terminal-window'
 import { TechMarquee } from '@/components/tech-marquee'
 
 export function HeroSection() {
+  const prefersReducedMotion = useReducedMotion()
+
+  const anim = (delay: number = 0) => {
+    if (prefersReducedMotion) return {}
+    return {
+      initial: { opacity: 0, y: 20 },
+      animate: { opacity: 1, y: 0 },
+      transition: { duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] }
+    }
+  }
+
   return (
-    <section className="relative min-h-screen flex flex-col">
+    <section id="hero" className="relative min-h-screen flex flex-col scroll-mt-20">
       {/* Aurora Background - with overflow visible to show full blobs */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         <AuroraBackground className="absolute inset-0" />
@@ -20,11 +31,7 @@ export function HeroSection() {
           {/* Left side - Text content */}
           <div className="space-y-8">
             {/* Badge */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            >
+            <motion.div {...anim(0)}>
               <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-sm text-primary font-medium">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
@@ -37,17 +44,13 @@ export function HeroSection() {
             {/* Headline */}
             <div className="space-y-2">
               <motion.h1
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+                {...anim(0.1)}
                 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-display font-bold leading-[1.1] tracking-tight text-foreground"
               >
                 Your startup ships product.
               </motion.h1>
               <motion.h1
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                {...anim(0.2)}
                 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-display font-bold leading-[1.1] tracking-tight text-primary"
               >
                 We handle the infrastructure.
@@ -56,9 +59,7 @@ export function HeroSection() {
 
             {/* Subheadline */}
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              {...anim(0.3)}
               className="text-lg sm:text-xl text-muted-foreground max-w-xl leading-relaxed"
             >
               Elite DevOps for seed-stage startups. We build the CI/CD pipelines, 
@@ -67,9 +68,7 @@ export function HeroSection() {
 
             {/* CTAs */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              {...anim(0.4)}
               className="flex flex-col sm:flex-row gap-4"
             >
               <Link
@@ -106,7 +105,7 @@ export function HeroSection() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.6 }}
-          className="mt-12 lg:mt-16"
+          className={`mt-12 lg:mt-16 ${prefersReducedMotion ? 'opacity-100' : ''}`}
         >
           <TechMarquee />
         </motion.div>
