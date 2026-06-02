@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import Link from 'next/link'
 import { GlassCard } from '@/components/glass-card'
 import { PRICING } from '@/lib/constants'
@@ -33,6 +33,28 @@ const projects = [
 ]
 
 export function PortfolioSection() {
+  const prefersReducedMotion = useReducedMotion()
+
+  const headingAnims = prefersReducedMotion ? {} : {
+    initial: { opacity: 0, y: 20 },
+    whileInView: { opacity: 1, y: 0 },
+    transition: { duration: 0.4 }
+  }
+
+  const cardAnims = (index: number) => {
+    if (prefersReducedMotion) return {}
+    return {
+      initial: { opacity: 0, y: 30 },
+      whileInView: { opacity: 1, y: 0 },
+      transition: {
+        duration: 0.5,
+        ease: "easeOut",
+        delay: index === 0 ? 0 : 0.15
+      },
+      viewport: { once: true, margin: "-100px" }
+    }
+  }
+
   return (
     <section id="portfolio" className="relative py-24 overflow-hidden scroll-mt-20">
       {/* Background */}
@@ -41,9 +63,7 @@ export function PortfolioSection() {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 xl:px-6">
         {/* Section header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          {...headingAnims}
           viewport={{ once: true }}
           className="text-center mb-16"
         >
@@ -63,10 +83,7 @@ export function PortfolioSection() {
           {projects.map((project, index) => (
             <motion.div
               key={project.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              viewport={{ once: true }}
+              {...cardAnims(index)}
               className="xl:h-full"
             >
               <GlassCard className="overflow-hidden xl:h-full group">

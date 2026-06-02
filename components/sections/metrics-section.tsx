@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, useInView, animate, useMotionValue, useTransform } from 'framer-motion'
+import { motion, useInView, animate, useMotionValue, useTransform, useReducedMotion } from 'framer-motion'
 import { useRef, useState, useEffect } from 'react'
 import { GlassCard } from '@/components/glass-card'
 import { PRICING } from '@/lib/constants'
@@ -98,6 +98,34 @@ function AnimatedNumber({ value, suffix }: { value: string; suffix: string }) {
 }
 
 export function MetricsSection() {
+  const prefersReducedMotion = useReducedMotion()
+
+  const headingAnims = prefersReducedMotion ? {} : {
+    initial: { opacity: 0, y: 20 },
+    whileInView: { opacity: 1, y: 0 },
+    transition: { duration: 0.4 }
+  }
+
+  const statAnims = (index: number) => {
+    if (prefersReducedMotion) return {}
+    return {
+      initial: { opacity: 0, y: 30 },
+      whileInView: { opacity: 1, y: 0 },
+      transition: { duration: 0.5, ease: "easeOut", delay: index * 0.1 },
+      viewport: { once: true, margin: "-100px" }
+    }
+  }
+
+  const testimonialAnims = (index: number) => {
+    if (prefersReducedMotion) return {}
+    return {
+      initial: { opacity: 0, scale: 0.97 },
+      whileInView: { opacity: 1, scale: 1 },
+      transition: { duration: 0.5, ease: "easeOut", delay: index * 0.1 },
+      viewport: { once: true, margin: "-100px" }
+    }
+  }
+
   return (
     <section className="relative py-24 overflow-hidden">
       {/* Background with sparkles/glow effect */}
@@ -110,9 +138,7 @@ export function MetricsSection() {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 xl:px-6">
         {/* Section header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          {...headingAnims}
           viewport={{ once: true }}
           className="text-center mb-16"
         >
@@ -130,17 +156,21 @@ export function MetricsSection() {
         {/* Stats grid */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {stats.map((stat, index) => (
-            <GlassCard
+            <motion.div
               key={stat.label}
-              delay={index * 0.1}
-              className="p-6 text-center"
+              {...statAnims(index)}
             >
-              <AnimatedNumber value={stat.value} suffix={stat.suffix} />
+              <GlassCard
+                delay={0}
+                className="p-6 text-center"
+              >
+                <AnimatedNumber value={stat.value} suffix={stat.suffix} />
               <div className="mt-3">
-                <div className="text-foreground font-medium mb-1">{stat.label}</div>
-                <div className="text-sm text-muted-foreground">{stat.description}</div>
-              </div>
-            </GlassCard>
+                  <div className="text-foreground font-medium mb-1">{stat.label}</div>
+                  <div className="text-sm text-muted-foreground">{stat.description}</div>
+                </div>
+              </GlassCard>
+            </motion.div>
           ))}
         </div>
 
@@ -149,10 +179,7 @@ export function MetricsSection() {
           {testimonials.map((testimonial, index) => (
             <motion.div
               key={testimonial.author}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              viewport={{ once: true }}
+              {...testimonialAnims(index)}
             >
               <GlassCard className="p-8 h-full">
                 <div className="flex flex-col h-full">

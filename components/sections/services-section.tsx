@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import Link from 'next/link'
 import { GlassCard } from '@/components/glass-card'
 import { PRICING } from '@/lib/constants'
@@ -63,6 +63,43 @@ const services = [
 ]
 
 export function ServicesSection() {
+  const prefersReducedMotion = useReducedMotion()
+
+  const headingAnims = prefersReducedMotion ? {} : {
+    initial: { opacity: 0, y: 20 },
+    whileInView: { opacity: 1, y: 0 },
+    transition: { duration: 0.4 }
+  }
+
+  const bannerAnims = prefersReducedMotion ? {} : {
+    initial: { opacity: 0, scale: 0.95 },
+    whileInView: { opacity: 1, scale: 1 },
+    transition: { duration: 0.5 },
+    viewport: { once: true }
+  }
+
+  const cardAnims = (index: number, highlighted: boolean) => {
+    if (prefersReducedMotion) return {}
+    return {
+      initial: {
+        opacity: 0,
+        y: 30,
+        scale: highlighted ? 0.97 : 1
+      },
+      whileInView: {
+        opacity: 1,
+        y: 0,
+        scale: 1
+      },
+      transition: {
+        duration: 0.5,
+        ease: "easeOut",
+        delay: index * 0.1
+      },
+      viewport: { once: true, margin: "-100px" }
+    }
+  }
+
   return (
     <section id="services" className="relative py-24 overflow-hidden scroll-mt-20">
       {/* Background */}
@@ -77,9 +114,7 @@ export function ServicesSection() {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 xl:px-6">
         {/* Section header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          {...headingAnims}
           viewport={{ once: true }}
           className="text-center mb-16"
         >
@@ -96,10 +131,7 @@ export function ServicesSection() {
 
         {/* Launch Banner */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          viewport={{ once: true }}
+          {...bannerAnims}
           className="max-w-fit mx-auto mb-12"
         >
           <div className="bg-amber-500/10 border border-amber-500/20 rounded-full px-6 py-2 flex items-center gap-2">
@@ -114,10 +146,7 @@ export function ServicesSection() {
           {services.map((service, index) => (
             <motion.div
               key={service.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              viewport={{ once: true }}
+              {...cardAnims(index, service.highlighted)}
               className={`relative ${service.highlighted ? 'lg:-translate-y-4' : ''} xl:h-full`}
             >
               {/* Badge for highlighted card */}

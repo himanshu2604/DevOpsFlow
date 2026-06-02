@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, useInView } from 'framer-motion'
+import { motion, useInView, useReducedMotion } from 'framer-motion'
 import { useRef } from 'react'
 import { PRICING } from '@/lib/constants'
 
@@ -26,8 +26,31 @@ const steps = [
 ]
 
 export function HowItWorksSection() {
+  const prefersReducedMotion = useReducedMotion()
   const containerRef = useRef(null)
   const isInView = useInView(containerRef, { once: true, margin: '-100px' })
+
+  const headingAnims = prefersReducedMotion ? {} : {
+    initial: { opacity: 0, y: 20 },
+    whileInView: { opacity: 1, y: 0 },
+    transition: { duration: 0.4 }
+  }
+
+  const stepAnims = (index: number) => {
+    if (prefersReducedMotion) return {}
+
+    let initial = { opacity: 0, x: 0, y: 0 }
+    if (index === 0) initial.x = -30
+    else if (index === 1) initial.y = 30
+    else if (index === 2) initial.x = 30
+
+    return {
+      initial,
+      whileInView: { opacity: 1, x: 0, y: 0 },
+      transition: { duration: 0.5, ease: "easeOut" },
+      viewport: { once: true, margin: "-100px" }
+    }
+  }
 
   return (
     <section id="how-it-works" className="relative py-24 overflow-hidden scroll-mt-20">
@@ -37,9 +60,7 @@ export function HowItWorksSection() {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 xl:px-6">
         {/* Section header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          {...headingAnims}
           viewport={{ once: true }}
           className="text-center mb-16"
         >
@@ -103,10 +124,7 @@ export function HowItWorksSection() {
             {steps.map((step, index) => (
               <motion.div
                 key={step.number}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.2 }}
-                viewport={{ once: true }}
+                {...stepAnims(index)}
                 className="relative pl-20 lg:pl-0"
               >
                 {/* Step number circle - green filled */}

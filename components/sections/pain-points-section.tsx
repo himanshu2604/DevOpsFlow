@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { GlassCard } from '@/components/glass-card'
 
 const painPoints = [
@@ -62,6 +62,21 @@ const cardVariants = {
 }
 
 export function PainPointsSection() {
+  const prefersReducedMotion = useReducedMotion()
+
+  const headingAnims = prefersReducedMotion ? {} : {
+    initial: { opacity: 0, y: 20 },
+    whileInView: { opacity: 1, y: 0 },
+    transition: { duration: 0.4 }
+  }
+
+  const cardAnims = (index: number) => prefersReducedMotion ? {} : {
+    initial: { opacity: 0, y: 30 },
+    whileInView: { opacity: 1, y: 0 },
+    transition: { duration: 0.5, ease: "easeOut", delay: index * 0.1 },
+    viewport: { once: true, margin: "-100px" }
+  }
+
   return (
     <section className="relative py-24 overflow-hidden">
       {/* Background gradient */}
@@ -70,9 +85,7 @@ export function PainPointsSection() {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 xl:px-6">
         {/* Section header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          {...headingAnims}
           viewport={{ once: true }}
           className="text-center mb-16"
         >
@@ -88,15 +101,13 @@ export function PainPointsSection() {
         </motion.div>
 
         {/* Pain point cards with staggered animation */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: '-50px' }}
-          className="grid md:grid-cols-3 gap-6 lg:gap-8 xl:items-stretch"
-        >
-          {painPoints.map((point) => (
-            <motion.div key={point.title} variants={cardVariants} className="xl:h-full">
+        <div className="grid md:grid-cols-3 gap-6 lg:gap-8 xl:items-stretch">
+          {painPoints.map((point, index) => (
+            <motion.div
+              key={point.title}
+              {...cardAnims(index)}
+              className="xl:h-full"
+            >
               <GlassCard
                 delay={0}
                 className="p-8 hover:border-primary/30 transition-colors duration-300 xl:h-full"
@@ -132,7 +143,7 @@ export function PainPointsSection() {
               </GlassCard>
             </motion.div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   )
