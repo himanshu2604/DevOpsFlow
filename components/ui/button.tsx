@@ -48,8 +48,8 @@ function Button({
 }: React.ComponentProps<'button'> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean
-  }) {
-  const Comp = (asChild ? MotionSlot : motion.button) as any
+  } & React.ComponentProps<typeof motion.button>) {
+  const Comp = asChild ? MotionSlot : motion.button
 
   const motionProps = variant === 'default'
     ? {
