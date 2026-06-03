@@ -366,7 +366,7 @@ export default function ContactPage() {
                         <label
                           className={cn(
                             "absolute left-4 transition-all duration-200 pointer-events-none text-muted-foreground",
-                            formState.service
+                            (formState.service || focusedField === 'service')
                               ? "text-[10px] uppercase tracking-wider font-bold top-2 text-primary"
                               : "text-base top-4"
                           )}
@@ -430,7 +430,7 @@ export default function ContactPage() {
                         <label
                           className={cn(
                             "absolute left-4 transition-all duration-200 pointer-events-none text-muted-foreground",
-                            formState.timeline
+                            (formState.timeline || focusedField === 'timeline')
                               ? "text-[10px] uppercase tracking-wider font-bold top-2 text-primary"
                               : "text-base top-4"
                           )}
