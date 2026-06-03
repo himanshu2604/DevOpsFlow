@@ -101,8 +101,11 @@ export function Footer() {
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
+                    className="group flex items-center text-sm text-muted-foreground hover:text-white transition-all duration-200 hover:translate-x-1"
                   >
+                    <span className="w-0 opacity-0 group-hover:w-4 group-hover:opacity-100 transition-all duration-200 text-primary overflow-hidden">
+                      →
+                    </span>
                     {link.label}
                   </Link>
                 </li>
@@ -118,8 +121,11 @@ export function Footer() {
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
+                    className="group flex items-center text-sm text-muted-foreground hover:text-white transition-all duration-200 hover:translate-x-1"
                   >
+                    <span className="w-0 opacity-0 group-hover:w-4 group-hover:opacity-100 transition-all duration-200 text-primary overflow-hidden">
+                      →
+                    </span>
                     {link.label}
                   </Link>
                 </li>
@@ -135,8 +141,11 @@ export function Footer() {
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
+                    className="group flex items-center text-sm text-muted-foreground hover:text-white transition-all duration-200 hover:translate-x-1"
                   >
+                    <span className="w-0 opacity-0 group-hover:w-4 group-hover:opacity-100 transition-all duration-200 text-primary overflow-hidden">
+                      →
+                    </span>
                     {link.label}
                   </Link>
                 </li>

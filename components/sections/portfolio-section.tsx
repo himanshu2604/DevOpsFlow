@@ -126,7 +126,7 @@ export function PortfolioSection() {
                       {project.techStack.map((tech) => (
                         <span
                           key={tech}
-                          className="px-3 py-1 text-xs font-mono bg-card border border-border rounded-full text-muted-foreground"
+                          className="px-3 py-1 text-xs font-mono bg-card border border-border rounded-full text-muted-foreground hover:text-[#00e5a0] hover:border-[rgba(0,229,160,0.4)] transition-all duration-150 cursor-default"
                         >
                           {tech}
                         </span>
@@ -137,10 +137,17 @@ export function PortfolioSection() {
                     <div className="mt-auto">
                       <Link
                         href="/contact"
-                        className="inline-flex items-center gap-2 text-primary font-medium hover:gap-3 transition-all duration-200 group"
+                        className="relative inline-flex items-center gap-2 text-primary font-medium group"
                       >
-                        Discuss your project
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <span className="relative after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 group-hover:after:w-full">
+                          Discuss your project
+                        </span>
+                        <svg
+                          className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                         </svg>
                       </Link>

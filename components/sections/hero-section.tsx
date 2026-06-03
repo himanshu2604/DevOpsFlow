@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion } from 'framer-motion'
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 import { AuroraBackground } from '@/components/aurora-background'
 import { TerminalWindow } from '@/components/terminal-window'
 import { TechMarquee } from '@/components/tech-marquee'
@@ -71,26 +72,33 @@ export function HeroSection() {
               {...anim(0.4)}
               className="flex flex-col sm:flex-row gap-4"
             >
-              <Link
-                href="/contact"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-primary text-primary-foreground font-semibold text-base rounded-lg hover:bg-primary/90 transition-all duration-200 hover:shadow-lg hover:shadow-primary/25 group"
+              <Button
+                asChild
+                size="lg"
+                className="h-auto py-3.5 text-base font-semibold group"
               >
-                Book Free Audit
-                <svg 
-                  className="w-4 h-4 transition-transform group-hover:translate-x-1" 
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
-              </Link>
-              <Link
-                href="/#services"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-transparent border border-border text-foreground font-semibold text-base rounded-lg hover:bg-card hover:border-primary/50 transition-all duration-200"
+                <Link href="/contact">
+                  Book Free Audit
+                  <svg
+                    className="w-4 h-4 transition-transform group-hover:translate-x-1"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </Link>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className="h-auto py-3.5 text-base font-semibold"
               >
-                View Services
-              </Link>
+                <Link href="/#services">
+                  View Services
+                </Link>
+              </Button>
             </motion.div>
           </div>
 
