@@ -27,9 +27,20 @@ interface FloatingInputProps extends React.InputHTMLAttributes<HTMLInputElement 
   error?: string
   isTouched?: boolean
   isTextArea?: boolean
+  charCount?: number
+  maxCharCount?: number
 }
 
-function FloatingInput({ label, error, isTouched, isTextArea, className, ...props }: FloatingInputProps) {
+function FloatingInput({
+  label,
+  error,
+  isTouched,
+  isTextArea,
+  className,
+  charCount,
+  maxCharCount,
+  ...props
+}: FloatingInputProps) {
   const [isFocused, setIsFocused] = useState(false)
   const hasValue = props.value !== ''
   const isValid = isTouched && !error && hasValue
@@ -43,8 +54,8 @@ function FloatingInput({ label, error, isTouched, isTextArea, className, ...prop
     >
       <div className={cn(
         "relative rounded-lg border bg-card transition-all duration-200",
-        isFocused ? "border-primary ring-1 ring-primary/20" : "border-border",
-        error ? "border-destructive ring-destructive/20" :
+        isFocused ? "border-primary shadow-[0_0_15px_rgba(0,229,160,0.1)]" : "border-border",
+        error ? "border-destructive ring-1 ring-destructive/20" :
         isValid ? "border-primary/50" : "group-hover:border-white/20"
       )}>
         <InputComponent
@@ -58,8 +69,8 @@ function FloatingInput({ label, error, isTouched, isTextArea, className, ...prop
             props.onBlur?.(e)
           }}
           className={cn(
-            "w-full bg-transparent px-4 pt-6 pb-2 text-foreground outline-none transition-all",
-            isTextArea && "min-h-[120px] resize-none",
+            "w-full bg-transparent px-4 pt-6 text-foreground outline-none transition-all",
+            isTextArea ? "min-h-[150px] pb-8 resize-none" : "pb-2",
             className
           )}
           placeholder=" " // Required for the peer-placeholder-shown trick or custom logic
@@ -95,6 +106,16 @@ function FloatingInput({ label, error, isTouched, isTextArea, className, ...prop
             </svg>
           </motion.div>
         )}
+
+        {charCount !== undefined && maxCharCount !== undefined && (
+          <div className={cn(
+            "absolute right-4 bottom-2 text-[10px] font-mono transition-colors",
+            charCount >= maxCharCount ? "text-destructive" :
+            charCount >= maxCharCount * 0.8 ? "text-amber-500" : "text-muted-foreground"
+          )}>
+            {charCount}/{maxCharCount}
+          </div>
+        )}
       </div>
 
       <AnimatePresence>
@@ -127,6 +148,7 @@ export default function ContactPage() {
   const [submitError, setSubmitError] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [touched, setTouched] = useState<Record<string, boolean>>({})
+  const [focusedField, setFocusedField] = useState<string | null>(null)
 
   const validateField = (name: string, value: string) => {
     let error = ''
@@ -134,7 +156,7 @@ export default function ContactPage() {
     if (name === 'company' && !value.trim()) error = 'Company is required'
     if (name === 'email') {
       if (!value.trim()) error = 'Email is required'
-      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) error = 'Please enter a valid email'
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) error = 'Please enter a valid work email'
     }
     if (name === 'service' && !value) error = 'Please select a service'
     if (name === 'timeline' && !value) error = 'Please select a timeline'
@@ -298,40 +320,39 @@ export default function ContactPage() {
                       required
                     />
 
-                    <div className="relative">
-                      <FloatingInput
-                        isTextArea
-                        label="Tell us about your project"
-                        id="message"
-                        name="message"
-                        value={formState.message}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        error={errors.message}
-                        isTouched={touched.message}
-                        required
-                      />
-                      <div className={cn(
-                        "absolute right-4 bottom-2 text-[10px] font-mono transition-colors",
-                        getMessageCounterColor(formState.message.length)
-                      )}>
-                        {formState.message.length}/500
-                      </div>
-                    </div>
+                    <FloatingInput
+                      isTextArea
+                      label="Tell us about your project"
+                      id="message"
+                      name="message"
+                      value={formState.message}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      error={errors.message}
+                      isTouched={touched.message}
+                      charCount={formState.message.length}
+                      maxCharCount={500}
+                      required
+                    />
 
                     <div className="grid md:grid-cols-2 gap-6">
                     <div className="relative group">
                       <div className={cn(
                         "relative rounded-lg border bg-card transition-all duration-200",
-                        formState.service ? "border-primary/50" : "border-border",
-                        errors.service ? "border-destructive ring-1 ring-destructive/20" : "group-hover:border-white/20"
+                        focusedField === 'service' ? "border-primary shadow-[0_0_15px_rgba(0,229,160,0.1)]" : "border-border",
+                        errors.service ? "border-destructive ring-1 ring-destructive/20" :
+                        (formState.service && !errors.service) ? "border-primary/50" : "group-hover:border-white/20"
                       )}>
                         <select
                           id="service"
                           name="service"
                           value={formState.service}
                           onChange={handleChange}
-                          onBlur={handleBlur}
+                          onFocus={() => setFocusedField('service')}
+                          onBlur={(e) => {
+                            setFocusedField(null)
+                            handleBlur(e)
+                          }}
                           className="w-full bg-transparent px-4 pt-6 pb-2 text-foreground outline-none appearance-none cursor-pointer"
                           required
                         >
@@ -382,18 +403,23 @@ export default function ContactPage() {
                     <div className="relative group">
                       <div className={cn(
                         "relative rounded-lg border bg-card transition-all duration-200",
-                        formState.timeline ? "border-primary/50" : "border-border",
-                        errors.timeline ? "border-destructive ring-1 ring-destructive/20" : "group-hover:border-white/20"
+                        focusedField === 'timeline' ? "border-primary shadow-[0_0_15px_rgba(0,229,160,0.1)]" : "border-border",
+                        errors.timeline ? "border-destructive ring-1 ring-destructive/20" :
+                        (formState.timeline && !errors.timeline) ? "border-primary/50" : "group-hover:border-white/20"
                       )}>
                         <select
                           id="timeline"
                           name="timeline"
                           value={formState.timeline}
                           onChange={handleChange}
-                          onBlur={handleBlur}
+                          onFocus={() => setFocusedField('timeline')}
+                          onBlur={(e) => {
+                            setFocusedField(null)
+                            handleBlur(e)
+                          }}
                           className="w-full bg-transparent px-4 pt-6 pb-2 text-foreground outline-none appearance-none cursor-pointer"
                           required
-                        >
++                        >
                           <option value="" disabled className="bg-background">Select a timeline</option>
                           {timelines.map((timeline) => (
                             <option key={timeline.id} value={timeline.id} className="bg-background">
@@ -455,7 +481,7 @@ export default function ContactPage() {
                               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                             </svg>
-                            Deploying...
+                            Transmitting...
                           </>
                         ) : isSubmitted ? (
                           <>Request Deployed ✓</>
