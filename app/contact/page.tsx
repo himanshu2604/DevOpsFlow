@@ -419,7 +419,7 @@ export default function ContactPage() {
                           }}
                           className="w-full bg-transparent px-4 pt-6 pb-2 text-foreground outline-none appearance-none cursor-pointer"
                           required
-+                        >
+                        >
                           <option value="" disabled className="bg-background">Select a timeline</option>
                           {timelines.map((timeline) => (
                             <option key={timeline.id} value={timeline.id} className="bg-background">
