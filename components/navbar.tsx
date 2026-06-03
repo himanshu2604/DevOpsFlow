@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { Button } from '@/components/ui/button'
 
 const navLinks = [
   { href: '/#hero', label: 'Home', id: 'hero' },
@@ -130,8 +131,8 @@ export function Navbar() {
                     key={link.href}
                     href={link.href}
                     onClick={(e) => handleNavLinkClick(e, link.href)}
-                    className={`relative text-sm transition-colors duration-200 group ${
-                      isActive ? 'text-white' : 'text-muted-foreground hover:text-foreground'
+                    className={`relative text-sm transition-colors duration-150 group ${
+                      isActive ? 'text-white' : 'text-muted-foreground hover:text-white'
                     }`}
                   >
                     {link.label}
@@ -151,16 +152,18 @@ export function Navbar() {
 
             {/* Desktop CTA */}
             <div className="hidden md:block">
-              <Link
-                href="/contact"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground font-medium text-sm rounded-lg hover:bg-primary/90 transition-all duration-200 hover:shadow-lg hover:shadow-primary/25"
-              >
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-foreground/50 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-foreground" />
-                </span>
-                Book Free Audit
-              </Link>
+              <Button asChild size="lg" className="h-10 px-5 py-2.5">
+                <Link href="/contact">
+                  <span className="relative flex h-2 w-2">
+                    <motion.span
+                      animate={{ scale: [1, 1.3, 1] }}
+                      transition={{ repeat: Infinity, duration: 2 }}
+                      className="relative inline-flex rounded-full h-2 w-2 bg-primary-foreground"
+                    />
+                  </span>
+                  Book Free Audit
+                </Link>
+              </Button>
             </div>
 
             {/* Mobile Menu Button */}
@@ -219,7 +222,7 @@ export function Navbar() {
                     <Link
                       href={link.href}
                       onClick={(e) => handleNavLinkClick(e, link.href)}
-                      className={`relative text-2xl font-display font-medium transition-colors ${
+                      className={`relative text-2xl font-display font-medium transition-colors duration-150 ${
                         isActive ? 'text-white' : 'text-foreground hover:text-primary'
                       }`}
                     >
@@ -244,17 +247,21 @@ export function Navbar() {
                 transition={{ duration: 0.3, delay: 0.3 }}
                 className="mt-4"
               >
-                <Link
-                  href="/contact"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground font-medium rounded-lg"
-                >
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-foreground/50 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-foreground" />
-                  </span>
-                  Book Free Audit
-                </Link>
+                <Button asChild size="lg" className="px-6 py-3">
+                  <Link
+                    href="/contact"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <span className="relative flex h-2 w-2">
+                      <motion.span
+                        animate={{ scale: [1, 1.3, 1] }}
+                        transition={{ repeat: Infinity, duration: 2 }}
+                        className="relative inline-flex rounded-full h-2 w-2 bg-primary-foreground"
+                      />
+                    </span>
+                    Book Free Audit
+                  </Link>
+                </Button>
               </motion.div>
             </motion.nav>
           </motion.div>

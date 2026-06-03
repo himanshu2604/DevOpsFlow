@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion } from 'framer-motion'
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 import { GlassCard } from '@/components/glass-card'
 import { PRICING } from '@/lib/constants'
 
@@ -213,19 +214,18 @@ export function ServicesSection() {
                   
                   {/* CTA */}
                   <div className="xl:mt-auto">
-                    <Link
-                      href="/contact"
-                      className={`w-full inline-flex items-center justify-center gap-2 px-6 py-3 font-semibold text-sm rounded-lg transition-all duration-200 ${
-                        service.highlighted
-                          ? 'bg-secondary text-secondary-foreground hover:bg-secondary/90'
-                          : 'bg-card border border-border hover:border-primary/50 text-foreground'
-                      }`}
+                    <Button
+                      asChild
+                      variant={service.highlighted ? 'secondary' : 'outline'}
+                      className="w-full"
                     >
-                      Get Started
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                      </svg>
-                    </Link>
+                      <Link href="/contact">
+                        Get Started
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                        </svg>
+                      </Link>
+                    </Button>
                   </div>
                 </div>
               </div>

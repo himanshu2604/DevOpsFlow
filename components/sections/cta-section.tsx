@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion } from 'framer-motion'
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 
 export function CTASection() {
   const prefersReducedMotion = useReducedMotion()
@@ -88,26 +89,33 @@ export function CTASection() {
 
           {/* CTA buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-            <Link
-              href="/contact"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-primary text-primary-foreground font-semibold text-lg rounded-lg hover:bg-primary/90 transition-all duration-200 hover:shadow-lg hover:shadow-primary/25 group"
+            <Button
+              asChild
+              size="lg"
+              className="h-auto py-4 px-8 text-lg font-semibold group"
             >
-              Book Free Audit
-              <svg 
-                className="w-5 h-5 transition-transform group-hover:translate-x-1" 
-                fill="none" 
-                viewBox="0 0 24 24" 
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
-            </Link>
-            <Link
-              href="/#services"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-transparent border border-border text-foreground font-semibold text-lg rounded-lg hover:bg-card hover:border-primary/50 transition-all duration-200"
+              <Link href="/contact">
+                Book Free Audit
+                <svg
+                  className="w-5 h-5 transition-transform group-hover:translate-x-1"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </Link>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="h-auto py-4 px-8 text-lg font-semibold"
             >
-              View Pricing
-            </Link>
+              <Link href="/#services">
+                View Pricing
+              </Link>
+            </Button>
           </div>
 
           {/* Trust indicators */}

@@ -1,10 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { GlassCard } from '@/components/glass-card'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 const services = [
   { id: 'cicd', label: 'CI/CD Setup' },
@@ -13,46 +15,166 @@ const services = [
   { id: 'audit', label: 'Free Audit' },
 ]
 
+const timelines = [
+  { id: 'immediate', label: 'Immediate (ASAP)' },
+  { id: '1-2-weeks', label: '1-2 Weeks' },
+  { id: 'month', label: 'Within a Month' },
+  { id: 'exploring', label: 'Just exploring' },
+]
+
+interface FloatingInputProps extends React.InputHTMLAttributes<HTMLInputElement | HTMLTextAreaElement> {
+  label: string
+  error?: string
+  isTouched?: boolean
+  isTextArea?: boolean
+  charCount?: number
+  maxCharCount?: number
+}
+
+function FloatingInput({
+  label,
+  error,
+  isTouched,
+  isTextArea,
+  className,
+  charCount,
+  maxCharCount,
+  ...props
+}: FloatingInputProps) {
+  const [isFocused, setIsFocused] = useState(false)
+  const hasValue = props.value !== ''
+  const isValid = isTouched && !error && hasValue
+
+  const InputComponent = isTextArea ? 'textarea' : 'input'
+
+  return (
+    <motion.div
+      className="relative group"
+      animate={error ? { x: [-1, 1, -1, 1, 0], transition: { duration: 0.2 } } : {}}
+    >
+      <div className={cn(
+        "relative rounded-lg border bg-card transition-all duration-200",
+        isFocused ? "border-primary shadow-[0_0_15px_rgba(0,229,160,0.1)]" : "border-border",
+        error ? "border-destructive ring-1 ring-destructive/20" :
+        isValid ? "border-primary/50" : "group-hover:border-white/20"
+      )}>
+        <InputComponent
+          {...(props as any)}
+          onFocus={(e) => {
+            setIsFocused(true)
+            props.onFocus?.(e)
+          }}
+          onBlur={(e) => {
+            setIsFocused(false)
+            props.onBlur?.(e)
+          }}
+          className={cn(
+            "w-full bg-transparent px-4 pt-6 text-foreground outline-none transition-all",
+            isTextArea ? "min-h-[150px] pb-8 resize-none" : "pb-2",
+            className
+          )}
+          placeholder=" " // Required for the peer-placeholder-shown trick or custom logic
+        />
+        <label
+          className={cn(
+            "absolute left-4 transition-all duration-200 pointer-events-none text-muted-foreground",
+            (isFocused || hasValue)
+              ? "text-[10px] uppercase tracking-wider font-bold top-2 text-primary"
+              : "text-base top-4"
+          )}
+        >
+          {label}
+          {props.required && <span className="text-destructive ml-1">*</span>}
+        </label>
+
+        {error && (
+          <div className="absolute right-3 top-4">
+            <svg className="w-5 h-5 text-destructive" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+        )}
+
+        {isValid && (
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="absolute right-3 top-4"
+          >
+            <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </motion.div>
+        )}
+
+        {charCount !== undefined && maxCharCount !== undefined && (
+          <div className={cn(
+            "absolute right-4 bottom-2 text-[10px] font-mono transition-colors",
+            charCount >= maxCharCount ? "text-destructive" :
+            charCount >= maxCharCount * 0.8 ? "text-amber-500" : "text-muted-foreground"
+          )}>
+            {charCount}/{maxCharCount}
+          </div>
+        )}
+      </div>
+
+      <AnimatePresence>
+        {error && (
+          <motion.p
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="text-destructive text-xs mt-1 ml-1"
+          >
+            {error}
+          </motion.p>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  )
+}
+
 export default function ContactPage() {
   const [formState, setFormState] = useState({
     name: '',
     email: '',
     company: '',
     service: '',
+    timeline: '',
     message: '',
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [submitError, setSubmitError] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
+  const [focusedField, setFocusedField] = useState<string | null>(null)
+
+  const validateField = (name: string, value: string) => {
+    let error = ''
+    if (name === 'name' && !value.trim()) error = 'Name is required'
+    if (name === 'company' && !value.trim()) error = 'Company is required'
+    if (name === 'email') {
+      if (!value.trim()) error = 'Email is required'
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) error = 'Please enter a valid work email'
+    }
+    if (name === 'service' && !value) error = 'Please select a service'
+    if (name === 'timeline' && !value) error = 'Please select a timeline'
+    if (name === 'message' && !value.trim()) error = 'Message is required'
+    
+    setErrors(prev => ({ ...prev, [name]: error }))
+    return !error
+  }
 
   const validateForm = () => {
-    const newErrors: Record<string, string> = {}
-    
-    if (!formState.name.trim()) {
-      newErrors.name = 'Name is required'
-    }
-    
-    if (!formState.email.trim()) {
-      newErrors.email = 'Email is required'
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formState.email)) {
-      newErrors.email = 'Please enter a valid email'
-    }
-    
-    if (!formState.company.trim()) {
-      newErrors.company = 'Company is required'
-    }
-    
-    if (!formState.service) {
-      newErrors.service = 'Please select a service'
-    }
-    
-    if (!formState.message.trim()) {
-      newErrors.message = 'Message is required'
-    }
-    
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
+    const fields = ['name', 'company', 'email', 'service', 'timeline', 'message']
+    let isValid = true
+    fields.forEach(field => {
+      if (!validateField(field, (formState as any)[field])) {
+        isValid = false
+      }
+    })
+    return isValid
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -61,7 +183,7 @@ export default function ContactPage() {
     if (!validateForm()) return
     
     setIsSubmitting(true)
-    setError(null)
+    setSubmitError(false)
     
     try {
       const response = await fetch('https://formspree.io/f/mqakpzoz', {
@@ -79,10 +201,10 @@ export default function ContactPage() {
       if (response.ok) {
         setIsSubmitted(true)
       } else {
-        setError('Transmission failed. Please email directly at hello@devopsflow.io')
+        setSubmitError(true)
       }
     } catch (err) {
-      setError('Transmission failed. Please email directly at hello@devopsflow.io')
+      setSubmitError(true)
     } finally {
       setIsSubmitting(false)
     }
@@ -90,11 +212,25 @@ export default function ContactPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
+    if (name === 'message' && value.length > 500) return
+
     setFormState((prev) => ({ ...prev, [name]: value }))
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: '' }))
+    if (touched[name]) {
+      validateField(name, value)
     }
-    if (error) setError(null)
+    if (submitError) setSubmitError(false)
+  }
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+    setTouched(prev => ({ ...prev, [name]: true }))
+    validateField(name, value)
+  }
+
+  const getMessageCounterColor = (length: number) => {
+    if (length >= 500) return 'text-red-500'
+    if (length >= 400) return 'text-amber-500'
+    return 'text-muted-foreground'
   }
 
   return (
@@ -139,226 +275,272 @@ export default function ContactPage() {
           <div className="grid lg:grid-cols-5 gap-12">
             {/* Form */}
             <div className="lg:col-span-3">
-              <AnimatePresence mode="wait">
-                {isSubmitted ? (
-                  <motion.div
-                    key="success"
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <GlassCard className="p-8 md:p-12 text-center">
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ duration: 0.5, delay: 0.2 }}
-                        className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center"
-                      >
-                        <svg className="w-10 h-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </motion.div>
-                      <h2 className="text-2xl font-display font-bold text-foreground mb-4">
-                        Request deployed.
-                      </h2>
-                      <p className="text-muted-foreground mb-6">
-                        We&apos;ll respond within 2 hours.
-                      </p>
-                      <button
-                        onClick={() => {
-                          setIsSubmitted(false)
-                          setFormState({ name: '', email: '', company: '', service: '', message: '' })
-                        }}
-                        className="text-primary hover:text-primary/80 font-medium transition-colors"
-                      >
-                        Send another message
-                      </button>
-                    </GlassCard>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="form"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <GlassCard className="p-8 md:p-12">
-                      <form onSubmit={handleSubmit} className="space-y-6">
-                        {error && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            className="p-4 rounded-lg bg-destructive/10 border border-destructive text-destructive text-sm"
-                          >
-                            {error}
-                          </motion.div>
-                        )}
-                        <div className="grid md:grid-cols-2 gap-6">
-                          {/* Name */}
-                          <div>
-                            <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
-                              Name
-                            </label>
-                            <input
-                              type="text"
-                              id="name"
-                              name="name"
-                              value={formState.name}
-                              onChange={handleChange}
-                              className={`w-full px-4 py-3 bg-card border ${errors.name ? 'border-destructive' : 'border-border'} rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary transition-colors`}
-                              placeholder="John Doe"
-                              required
-                            />
-                            {errors.name && (
-                              <motion.p
-                                initial={{ opacity: 0, y: -10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="text-destructive text-sm mt-1"
-                              >
-                                {errors.name}
-                              </motion.p>
-                            )}
-                          </div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <GlassCard className="p-8 md:p-12">
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <FloatingInput
+                        label="Name"
+                        id="name"
+                        name="name"
+                        value={formState.name}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        error={errors.name}
+                        isTouched={touched.name}
+                        required
+                      />
+                      <FloatingInput
+                        label="Company"
+                        id="company"
+                        name="company"
+                        value={formState.company}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        error={errors.company}
+                        isTouched={touched.company}
+                        required
+                      />
+                    </div>
 
-                          {/* Email */}
-                          <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
-                              Email
-                            </label>
-                            <input
-                              type="email"
-                              id="email"
-                              name="email"
-                              value={formState.email}
-                              onChange={handleChange}
-                              className={`w-full px-4 py-3 bg-card border ${errors.email ? 'border-destructive' : 'border-border'} rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary transition-colors`}
-                              placeholder="john@startup.com"
-                              required
-                            />
-                            {errors.email && (
-                              <motion.p
-                                initial={{ opacity: 0, y: -10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="text-destructive text-sm mt-1"
-                              >
-                                {errors.email}
-                              </motion.p>
-                            )}
-                          </div>
-                        </div>
+                    <FloatingInput
+                      label="Email"
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formState.email}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      error={errors.email}
+                      isTouched={touched.email}
+                      required
+                    />
 
-                        {/* Company */}
-                        <div>
-                          <label htmlFor="company" className="block text-sm font-medium text-foreground mb-2">
-                            Company
-                          </label>
-                          <input
-                            type="text"
-                            id="company"
-                            name="company"
-                            value={formState.company}
-                            onChange={handleChange}
-                            className={`w-full px-4 py-3 bg-card border ${errors.company ? 'border-destructive' : 'border-border'} rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary transition-colors`}
-                            placeholder="Acme Inc"
-                            required
-                          />
-                          {errors.company && (
-                            <motion.p
-                              initial={{ opacity: 0, y: -10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              className="text-destructive text-sm mt-1"
-                            >
-                              {errors.company}
-                            </motion.p>
-                          )}
-                        </div>
+                    <FloatingInput
+                      isTextArea
+                      label="Tell us about your project"
+                      id="message"
+                      name="message"
+                      value={formState.message}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      error={errors.message}
+                      isTouched={touched.message}
+                      charCount={formState.message.length}
+                      maxCharCount={500}
+                      required
+                    />
 
-                        {/* Service */}
-                        <div>
-                          <label htmlFor="service" className="block text-sm font-medium text-foreground mb-2">
-                            Service interested in
-                          </label>
-                          <select
-                            id="service"
-                            name="service"
-                            value={formState.service}
-                            onChange={handleChange}
-                            className={`w-full px-4 py-3 bg-card border ${errors.service ? 'border-destructive' : 'border-border'} rounded-lg text-foreground focus:outline-none focus:border-primary transition-colors appearance-none cursor-pointer`}
-                            required
-                          >
-                            <option value="" disabled>Select a service</option>
-                            {services.map((service) => (
-                              <option key={service.id} value={service.id}>
-                                {service.label}
-                              </option>
-                            ))}
-                          </select>
-                          {errors.service && (
-                            <motion.p
-                              initial={{ opacity: 0, y: -10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              className="text-destructive text-sm mt-1"
-                            >
-                              {errors.service}
-                            </motion.p>
-                          )}
-                        </div>
-
-                        {/* Message */}
-                        <div>
-                          <label htmlFor="message" className="block text-sm font-medium text-foreground mb-2">
-                            Tell us about your project
-                          </label>
-                          <textarea
-                            id="message"
-                            name="message"
-                            value={formState.message}
-                            onChange={handleChange}
-                            rows={5}
-                            className={`w-full px-4 py-3 bg-card border ${errors.message ? 'border-destructive' : 'border-border'} rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary transition-colors resize-none`}
-                            placeholder="Describe your current infrastructure setup and what you're looking to improve..."
-                            required
-                          />
-                          {errors.message && (
-                            <motion.p
-                              initial={{ opacity: 0, y: -10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              className="text-destructive text-sm mt-1"
-                            >
-                              {errors.message}
-                            </motion.p>
-                          )}
-                        </div>
-
-                        {/* Submit */}
-                        <button
-                          type="submit"
-                          disabled={isSubmitting}
-                          className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    <div className="grid md:grid-cols-2 gap-6">
+                    <div className="relative group">
+                      <div className={cn(
+                        "relative rounded-lg border bg-card transition-all duration-200",
+                        focusedField === 'service' ? "border-primary shadow-[0_0_15px_rgba(0,229,160,0.1)]" : "border-border",
+                        errors.service ? "border-destructive ring-1 ring-destructive/20" :
+                        (formState.service && !errors.service) ? "border-primary/50" : "group-hover:border-white/20"
+                      )}>
+                        <select
+                          id="service"
+                          name="service"
+                          value={formState.service}
+                          onChange={handleChange}
+                          onFocus={() => setFocusedField('service')}
+                          onBlur={(e) => {
+                            setFocusedField(null)
+                            handleBlur(e)
+                          }}
+                          className="w-full bg-transparent px-4 pt-6 pb-2 text-foreground outline-none appearance-none cursor-pointer"
+                          required
                         >
-                          {isSubmitting ? (
-                            <>
-                              <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                              </svg>
-                              Sending...
-                            </>
-                          ) : (
-                            <>
-                              Send Message
-                              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                              </svg>
-                            </>
+                          <option value="" disabled className="bg-background opacity-0">
+                            {focusedField === 'service' ? 'Select a service' : ''}
+                          </option>
+                          {services.map((service) => (
+                            <option key={service.id} value={service.id} className="bg-background">
+                              {service.label}
+                            </option>
+                          ))}
+                        </select>
+                        <label
+                          className={cn(
+                            "absolute left-4 transition-all duration-200 pointer-events-none text-muted-foreground",
+                            (formState.service || focusedField === 'service')
+                              ? "text-[10px] uppercase tracking-wider font-bold top-2 text-primary"
+                              : "text-base top-4"
                           )}
-                        </button>
-                      </form>
-                    </GlassCard>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                        >
+                          Service interested in
+                          <span className="text-destructive ml-1">*</span>
+                        </label>
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+                          {touched.service && !errors.service ? (
+                            <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                          ) : (
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          )}
+                        </div>
+                      </div>
+                      <AnimatePresence>
+                        {errors.service && (
+                          <motion.p
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            className="text-destructive text-xs mt-1 ml-1"
+                          >
+                            {errors.service}
+                          </motion.p>
+                        )}
+                      </AnimatePresence>
+                    </div>
+
+                    <div className="relative group">
+                      <div className={cn(
+                        "relative rounded-lg border bg-card transition-all duration-200",
+                        focusedField === 'timeline' ? "border-primary shadow-[0_0_15px_rgba(0,229,160,0.1)]" : "border-border",
+                        errors.timeline ? "border-destructive ring-1 ring-destructive/20" :
+                        (formState.timeline && !errors.timeline) ? "border-primary/50" : "group-hover:border-white/20"
+                      )}>
+                        <select
+                          id="timeline"
+                          name="timeline"
+                          value={formState.timeline}
+                          onChange={handleChange}
+                          onFocus={() => setFocusedField('timeline')}
+                          onBlur={(e) => {
+                            setFocusedField(null)
+                            handleBlur(e)
+                          }}
+                          className="w-full bg-transparent px-4 pt-6 pb-2 text-foreground outline-none appearance-none cursor-pointer"
+                          required
+                        >
+                          <option value="" disabled className="bg-background opacity-0">
+                            {focusedField === 'timeline' ? 'Select a timeline' : ''}
+                          </option>
+                          {timelines.map((timeline) => (
+                            <option key={timeline.id} value={timeline.id} className="bg-background">
+                              {timeline.label}
+                            </option>
+                          ))}
+                        </select>
+                        <label
+                          className={cn(
+                            "absolute left-4 transition-all duration-200 pointer-events-none text-muted-foreground",
+                            (formState.timeline || focusedField === 'timeline')
+                              ? "text-[10px] uppercase tracking-wider font-bold top-2 text-primary"
+                              : "text-base top-4"
+                          )}
+                        >
+                          Preferred Timeline
+                          <span className="text-destructive ml-1">*</span>
+                        </label>
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+                          {touched.timeline && !errors.timeline ? (
+                            <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                          ) : (
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          )}
+                        </div>
+                      </div>
+                      <AnimatePresence>
+                        {errors.timeline && (
+                          <motion.p
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            className="text-destructive text-xs mt-1 ml-1"
+                          >
+                            {errors.timeline}
+                          </motion.p>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <Button
+                        type="submit"
+                        disabled={isSubmitting || isSubmitted}
+                        variant={isSubmitted ? "outline" : "default"}
+                        className={cn(
+                          "w-full py-6 text-base transition-all duration-300",
+                          isSubmitted && "border-primary text-primary hover:bg-primary/5"
+                        )}
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                            </svg>
+                            Transmitting...
+                          </>
+                        ) : isSubmitted ? (
+                          <>Request Deployed ✓</>
+                        ) : submitError ? (
+                          <>Transmission Failed</>
+                        ) : (
+                          <>
+                            Deploy Request
+                            <svg className="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                            </svg>
+                          </>
+                        )}
+                      </Button>
+
+                      <AnimatePresence>
+                        {isSubmitted && (
+                          <motion.p
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="text-center text-sm text-primary font-medium"
+                          >
+                            We&apos;ve received your transmission. A senior engineer will respond within 2 hours.
+                          </motion.p>
+                        )}
+                        {submitError && (
+                          <motion.p
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="text-center text-sm text-destructive font-medium"
+                          >
+                            Something went wrong. Please try again or email us directly at{' '}
+                            <a href="mailto:hello@devopsflow.dev" className="underline hover:text-white transition-colors">
+                              hello@devopsflow.dev
+                            </a>
+                          </motion.p>
+                        )}
+                      </AnimatePresence>
+
+                      <div className="pt-6 mt-6 border-t border-white/5 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        {[
+                          { text: 'Fixed-price guarantee', icon: '🤝' },
+                          { text: '2h Response time', icon: '⚡' },
+                          { text: 'No spam, ever', icon: '🔐' }
+                        ].map((item) => (
+                          <div key={item.text} className="flex items-center gap-2 text-[10px] text-muted-foreground uppercase tracking-wider font-medium">
+                            <span className="text-xs">{item.icon}</span>
+                            {item.text}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </form>
+                </GlassCard>
+              </motion.div>
             </div>
 
             {/* Sidebar */}
@@ -404,13 +586,13 @@ export default function ContactPage() {
                   <h3 className="font-semibold text-foreground mb-4">Get in touch</h3>
                   <div className="space-y-4">
                     <a
-                      href="mailto:hello@devopsflow.io"
+                      href="mailto:hello@devopsflow.dev"
                       className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors"
                     >
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                       </svg>
-                      hello@devopsflow.io
+                      hello@devopsflow.dev
                     </a>
                     <a
                       href="https://cal.com"
@@ -441,19 +623,22 @@ export default function ContactPage() {
                 transition={{ duration: 0.5, delay: 0.4 }}
               >
                 <GlassCard className="p-6">
-                  <h3 className="font-semibold text-foreground mb-4">Why work with us?</h3>
-                  <ul className="space-y-3">
+                  <h3 className="font-semibold text-foreground mb-4">The DevOpsFlow Advantage</h3>
+                  <ul className="space-y-4">
                     {[
-                      'Fixed-price guarantee',
-                      'YC-backed startup experience',
-                      '10+ years combined experience',
-                      'SOC 2 compliant processes',
+                      { title: 'Fixed-Price Guarantee', desc: 'No hidden costs or scope creep, ever.' },
+                      { title: 'YC-Backed Experience', desc: 'We move at the speed of high-growth startups.' },
+                      { title: 'SOC 2 Ready', desc: 'Infrastructure built with security as a first-class citizen.' },
+                      { title: '48h Audit Delivery', desc: 'Get actionable insights within two business days.' },
                     ].map((item) => (
-                      <li key={item} className="flex items-center gap-3 text-muted-foreground">
-                        <svg className="w-4 h-4 text-primary flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <li key={item.title} className="flex gap-3">
+                        <svg className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
-                        {item}
+                        <div>
+                          <p className="text-sm font-semibold text-foreground leading-none mb-1">{item.title}</p>
+                          <p className="text-xs text-muted-foreground">{item.desc}</p>
+                        </div>
                       </li>
                     ))}
                   </ul>
