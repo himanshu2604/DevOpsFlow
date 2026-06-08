@@ -135,6 +135,18 @@ function FloatingInput({
 }
 
 export default function ContactPage() {
+  return (
+    <>
+      <Navbar />
+      <main id="main-content" tabIndex={-1} className="relative outline-none">
+        <ContactContent />
+        <Footer />
+      </main>
+    </>
+  )
+}
+
+function ContactContent() {
   const [formState, setFormState] = useState({
     name: '',
     email: '',
@@ -234,9 +246,7 @@ export default function ContactPage() {
   }
 
   return (
-    <main className="relative">
-      <Navbar />
-      
+    <>
       {/* Hero */}
       <section className="relative pt-32 pb-20 overflow-hidden">
         {/* Aurora-like gradient background */}
@@ -648,8 +658,6 @@ export default function ContactPage() {
           </div>
         </div>
       </section>
-
-      <Footer />
-    </main>
+    </>
   )
 }
