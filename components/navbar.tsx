@@ -5,6 +5,7 @@ import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 const navLinks = [
   { href: '/#hero', label: 'Home', id: 'hero' },
@@ -66,14 +67,36 @@ export function Navbar() {
     return () => observer.disconnect()
   }, [pathname])
 
+  const menuRef = useRef<HTMLDivElement>(null)
+  const lastFocusedElement = useRef<HTMLElement | null>(null)
+
   useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsMobileMenuOpen(false)
+      if (e.key === 'Tab' && menuRef.current) {
+        const focusable = menuRef.current.querySelectorAll('a, button')
+        const first = focusable[0] as HTMLElement
+        const last = focusable[focusable.length - 1] as HTMLElement
+        if (e.shiftKey && document.activeElement === first) {
+          last.focus(); e.preventDefault()
+        } else if (!e.shiftKey && document.activeElement === last) {
+          first.focus(); e.preventDefault()
+        }
+      }
+    }
+
     if (isMobileMenuOpen) {
+      lastFocusedElement.current = document.activeElement as HTMLElement
       document.body.style.overflow = 'hidden'
+      window.addEventListener('keydown', handleKeyDown)
+      setTimeout(() => (menuRef.current?.querySelector('a') as HTMLElement)?.focus(), 100)
     } else {
       document.body.style.overflow = ''
+      lastFocusedElement.current?.focus()
     }
     return () => {
       document.body.style.overflow = ''
+      window.removeEventListener('keydown', handleKeyDown)
     }
   }, [isMobileMenuOpen])
 
@@ -152,25 +175,34 @@ export function Navbar() {
 
             {/* Desktop CTA */}
             <div className="hidden md:block">
-              <Button asChild size="lg" className="h-10 px-5 py-2.5">
-                <Link href="/contact">
-                  <span className="relative flex h-2 w-2">
-                    <motion.span
-                      animate={{ scale: [1, 1.3, 1] }}
-                      transition={{ repeat: Infinity, duration: 2 }}
-                      className="relative inline-flex rounded-full h-2 w-2 bg-primary-foreground"
-                    />
-                  </span>
-                  Book Free Audit
-                </Link>
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button asChild size="lg" className="h-10 px-5 py-2.5">
+                    <Link href="/contact">
+                      <span className="relative flex h-2 w-2">
+                        <motion.span
+                          animate={{ scale: [1, 1.3, 1] }}
+                          transition={{ repeat: Infinity, duration: 2 }}
+                          className="relative inline-flex rounded-full h-2 w-2 bg-primary-foreground"
+                        />
+                      </span>
+                      Book Free Audit
+                    </Link>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="mb-2">
+                  We are currently accepting new projects
+                </TooltipContent>
+              </Tooltip>
             </div>
 
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="md:hidden relative w-10 h-10 flex items-center justify-center"
-              aria-label="Toggle menu"
+              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={isMobileMenuOpen}
+              aria-controls="mobile-menu"
             >
               <div className="flex flex-col gap-1.5">
                 <motion.span
@@ -195,6 +227,11 @@ export function Navbar() {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
+            ref={menuRef}
+            id="mobile-menu"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Mobile navigation"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

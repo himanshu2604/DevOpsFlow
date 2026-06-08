@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter, Space_Grotesk, JetBrains_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { TooltipProvider } from '@/components/ui/tooltip'
 import './globals.css'
 
 const inter = Inter({ 
@@ -84,12 +85,21 @@ export default function RootLayout({
   return (
     <html lang="en" className={`dark ${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable}`}>
       <body className="font-sans antialiased bg-background text-foreground min-h-screen overflow-x-hidden">
-        {/* Noise texture overlay */}
-        <div className="noise-overlay" aria-hidden="true" />
-        
-        {children}
-        
-        {process.env.NODE_ENV === 'production' && <Analytics />}
+        <TooltipProvider delayDuration={0}>
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:font-medium focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
+          >
+            Skip to content
+          </a>
+
+          {/* Noise texture overlay */}
+          <div className="noise-overlay" aria-hidden="true" />
+
+          {children}
+
+          {process.env.NODE_ENV === 'production' && <Analytics />}
+        </TooltipProvider>
       </body>
     </html>
   )
