@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion'
+import { motion, AnimatePresence, useScroll, useSpring, useMotionValueEvent } from 'framer-motion'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -20,21 +20,21 @@ export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('')
   const pathname = usePathname()
-  const { scrollYProgress } = useScroll()
+  const { scrollY, scrollYProgress } = useScroll()
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 100,
     damping: 30,
     restDelta: 0.001
   })
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50)
+  // Bolt: Use Framer Motion's optimized scroll listener instead of a manual window event listener
+  // This reduces the number of listeners on the main thread and leverages the existing useScroll hook.
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    const shouldBeScrolled = latest > 50
+    if (shouldBeScrolled !== isScrolled) {
+      setIsScrolled(shouldBeScrolled)
     }
-    
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+  })
 
   useEffect(() => {
     if (pathname !== '/') {
