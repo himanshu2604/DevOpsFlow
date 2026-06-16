@@ -23,6 +23,7 @@ export function CTASection() {
       <div className="absolute inset-0 overflow-hidden z-0">
         <motion.div
           className="absolute top-1/2 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"
+          style={{ willChange: 'transform' }}
           animate={{
             x: ['-100%', '100%'],
           }}
@@ -34,6 +35,7 @@ export function CTASection() {
         />
         <motion.div
           className="absolute top-1/3 left-0 w-full h-px bg-gradient-to-r from-transparent via-secondary/15 to-transparent"
+          style={{ willChange: 'transform' }}
           animate={{
             x: ['100%', '-100%'],
           }}
@@ -45,6 +47,7 @@ export function CTASection() {
         />
         <motion.div
           className="absolute top-2/3 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/15 to-transparent"
+          style={{ willChange: 'transform' }}
           animate={{
             x: ['-100%', '100%'],
           }}
