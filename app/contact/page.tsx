@@ -46,6 +46,7 @@ function FloatingInput({
   const isValid = isTouched && !error && hasValue
 
   const InputComponent = isTextArea ? 'textarea' : 'input'
+  const errorId = props.id ? `${props.id}-error` : undefined
 
   return (
     <motion.div
@@ -54,7 +55,7 @@ function FloatingInput({
     >
       <div className={cn(
         "relative rounded-lg border bg-card transition-all duration-200",
-        isFocused ? "border-primary shadow-[0_0_15px_rgba(0,229,160,0.1)]" : "border-border",
+        isFocused ? "border-primary shadow-[0_0_15px_rgba(0,229,160,0.1)] ring-2 ring-primary/20" : "border-border",
         error ? "border-destructive ring-1 ring-destructive/20" :
         isValid ? "border-primary/50" : "group-hover:border-white/20"
       )}>
@@ -68,6 +69,8 @@ function FloatingInput({
             setIsFocused(false)
             props.onBlur?.(e)
           }}
+          aria-invalid={!!error}
+          aria-describedby={error ? errorId : undefined}
           className={cn(
             "w-full bg-transparent px-4 pt-6 text-foreground outline-none transition-all",
             isTextArea ? "min-h-[150px] pb-8 resize-none" : "pb-2",
@@ -76,6 +79,7 @@ function FloatingInput({
           placeholder=" " // Required for the peer-placeholder-shown trick or custom logic
         />
         <label
+          htmlFor={props.id}
           className={cn(
             "absolute left-4 transition-all duration-200 pointer-events-none text-muted-foreground",
             (isFocused || hasValue)
@@ -84,11 +88,11 @@ function FloatingInput({
           )}
         >
           {label}
-          {props.required && <span className="text-destructive ml-1">*</span>}
+          {props.required && <span className="text-destructive ml-1" aria-hidden="true">*</span>}
         </label>
 
         {error && (
-          <div className="absolute right-3 top-4">
+          <div className="absolute right-3 top-4" aria-hidden="true">
             <svg className="w-5 h-5 text-destructive" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -100,6 +104,7 @@ function FloatingInput({
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="absolute right-3 top-4"
+            aria-hidden="true"
           >
             <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -121,6 +126,7 @@ function FloatingInput({
       <AnimatePresence>
         {error && (
           <motion.p
+            id={errorId}
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
@@ -291,6 +297,9 @@ function ContactContent() {
                 transition={{ duration: 0.5 }}
               >
                 <GlassCard className="p-8 md:p-12">
+                  <p className="text-xs text-muted-foreground mb-6">
+                    Fields marked with <span className="text-destructive" aria-hidden="true">*</span> are required
+                  </p>
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid md:grid-cols-2 gap-6">
                       <FloatingInput
@@ -349,7 +358,7 @@ function ContactContent() {
                     <div className="relative group">
                       <div className={cn(
                         "relative rounded-lg border bg-card transition-all duration-200",
-                        focusedField === 'service' ? "border-primary shadow-[0_0_15px_rgba(0,229,160,0.1)]" : "border-border",
+                        focusedField === 'service' ? "border-primary shadow-[0_0_15px_rgba(0,229,160,0.1)] ring-2 ring-primary/20" : "border-border",
                         errors.service ? "border-destructive ring-1 ring-destructive/20" :
                         (formState.service && !errors.service) ? "border-primary/50" : "group-hover:border-white/20"
                       )}>
@@ -363,6 +372,8 @@ function ContactContent() {
                             setFocusedField(null)
                             handleBlur(e)
                           }}
+                          aria-invalid={!!errors.service}
+                          aria-describedby={errors.service ? 'service-error' : undefined}
                           className="w-full bg-transparent px-4 pt-6 pb-2 text-foreground outline-none appearance-none cursor-pointer"
                           required
                         >
@@ -376,6 +387,7 @@ function ContactContent() {
                           ))}
                         </select>
                         <label
+                          htmlFor="service"
                           className={cn(
                             "absolute left-4 transition-all duration-200 pointer-events-none text-muted-foreground",
                             (formState.service || focusedField === 'service')
@@ -384,9 +396,9 @@ function ContactContent() {
                           )}
                         >
                           Service interested in
-                          <span className="text-destructive ml-1">*</span>
+                          <span className="text-destructive ml-1" aria-hidden="true">*</span>
                         </label>
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground" aria-hidden="true">
                           {touched.service && !errors.service ? (
                             <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -401,6 +413,7 @@ function ContactContent() {
                       <AnimatePresence>
                         {errors.service && (
                           <motion.p
+                            id="service-error"
                             initial={{ opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
@@ -415,7 +428,7 @@ function ContactContent() {
                     <div className="relative group">
                       <div className={cn(
                         "relative rounded-lg border bg-card transition-all duration-200",
-                        focusedField === 'timeline' ? "border-primary shadow-[0_0_15px_rgba(0,229,160,0.1)]" : "border-border",
+                        focusedField === 'timeline' ? "border-primary shadow-[0_0_15px_rgba(0,229,160,0.1)] ring-2 ring-primary/20" : "border-border",
                         errors.timeline ? "border-destructive ring-1 ring-destructive/20" :
                         (formState.timeline && !errors.timeline) ? "border-primary/50" : "group-hover:border-white/20"
                       )}>
@@ -429,6 +442,8 @@ function ContactContent() {
                             setFocusedField(null)
                             handleBlur(e)
                           }}
+                          aria-invalid={!!errors.timeline}
+                          aria-describedby={errors.timeline ? 'timeline-error' : undefined}
                           className="w-full bg-transparent px-4 pt-6 pb-2 text-foreground outline-none appearance-none cursor-pointer"
                           required
                         >
@@ -442,6 +457,7 @@ function ContactContent() {
                           ))}
                         </select>
                         <label
+                          htmlFor="timeline"
                           className={cn(
                             "absolute left-4 transition-all duration-200 pointer-events-none text-muted-foreground",
                             (formState.timeline || focusedField === 'timeline')
@@ -450,9 +466,9 @@ function ContactContent() {
                           )}
                         >
                           Preferred Timeline
-                          <span className="text-destructive ml-1">*</span>
+                          <span className="text-destructive ml-1" aria-hidden="true">*</span>
                         </label>
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground" aria-hidden="true">
                           {touched.timeline && !errors.timeline ? (
                             <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -467,6 +483,7 @@ function ContactContent() {
                       <AnimatePresence>
                         {errors.timeline && (
                           <motion.p
+                            id="timeline-error"
                             initial={{ opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
@@ -504,7 +521,7 @@ function ContactContent() {
                         ) : (
                           <>
                             Deploy Request
-                            <svg className="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                             </svg>
                           </>
@@ -514,6 +531,8 @@ function ContactContent() {
                       <AnimatePresence>
                         {isSubmitted && (
                           <motion.p
+                            role="status"
+                            aria-live="polite"
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             className="text-center text-sm text-primary font-medium"
@@ -523,6 +542,8 @@ function ContactContent() {
                         )}
                         {submitError && (
                           <motion.p
+                            role="status"
+                            aria-live="polite"
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             className="text-center text-sm text-destructive font-medium"
@@ -542,7 +563,7 @@ function ContactContent() {
                           { text: 'No spam, ever', icon: '🔐' }
                         ].map((item) => (
                           <div key={item.text} className="flex items-center gap-2 text-[10px] text-muted-foreground uppercase tracking-wider font-medium">
-                            <span className="text-xs">{item.icon}</span>
+                            <span className="text-xs" aria-hidden="true">{item.icon}</span>
                             {item.text}
                           </div>
                         ))}
@@ -563,7 +584,7 @@ function ContactContent() {
               >
                 <GlassCard className="p-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="relative w-3 h-3">
+                    <div className="relative w-3 h-3" aria-hidden="true">
                       <div className="absolute inset-0 bg-primary rounded-full animate-ping opacity-50" />
                       <div className="relative bg-primary rounded-full w-3 h-3" />
                     </div>
@@ -599,7 +620,7 @@ function ContactContent() {
                       href="mailto:hello@devopsflow.dev"
                       className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors"
                     >
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                       </svg>
                       hello@devopsflow.dev
@@ -610,13 +631,13 @@ function ContactContent() {
                       rel="noopener noreferrer"
                       className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors"
                     >
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
                       Book a call
                     </a>
                     <div className="flex items-center gap-3 text-muted-foreground">
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
@@ -642,7 +663,7 @@ function ContactContent() {
                       { title: '48h Audit Delivery', desc: 'Get actionable insights within two business days.' },
                     ].map((item) => (
                       <li key={item.title} className="flex gap-3">
-                        <svg className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                         <div>
