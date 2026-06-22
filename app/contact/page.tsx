@@ -6,7 +6,9 @@ import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { GlassCard } from '@/components/glass-card'
 import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
+import { CONTACT_EMAIL } from '@/lib/constants'
 
 const services = [
   { id: 'cicd', label: 'CI/CD Setup' },
@@ -167,6 +169,13 @@ function ContactContent() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [focusedField, setFocusedField] = useState<string | null>(null)
+  const [isEmailCopied, setIsEmailCopied] = useState(false)
+
+  const handleCopyEmail = () => {
+    navigator.clipboard.writeText(CONTACT_EMAIL)
+    setIsEmailCopied(true)
+    setTimeout(() => setIsEmailCopied(false), 2000)
+  }
 
   const validateField = (name: string, value: string) => {
     let error = ''
@@ -549,8 +558,8 @@ function ContactContent() {
                             className="text-center text-sm text-destructive font-medium"
                           >
                             Something went wrong. Please try again or email us directly at{' '}
-                            <a href="mailto:hello@devopsflow.dev" className="underline hover:text-white transition-colors">
-                              hello@devopsflow.dev
+                            <a href={`mailto:${CONTACT_EMAIL}`} className="underline hover:text-white transition-colors">
+                              {CONTACT_EMAIL}
                             </a>
                           </motion.p>
                         )}
@@ -616,15 +625,41 @@ function ContactContent() {
                 <GlassCard className="p-6">
                   <h3 className="font-semibold text-foreground mb-4">Get in touch</h3>
                   <div className="space-y-4">
-                    <a
-                      href="mailto:hello@devopsflow.dev"
-                      className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors"
-                    >
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                      </svg>
-                      hello@devopsflow.dev
-                    </a>
+                    <div className="flex items-center justify-between group/item">
+                      <a
+                        href={`mailto:${CONTACT_EMAIL}`}
+                        className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors"
+                      >
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        {CONTACT_EMAIL}
+                      </a>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              onClick={handleCopyEmail}
+                              className="p-1.5 rounded-md hover:bg-primary/10 text-muted-foreground hover:text-primary transition-all opacity-0 group-hover/item:opacity-100 focus-visible:opacity-100 outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+                              aria-label={isEmailCopied ? "Email copied" : "Copy email address"}
+                            >
+                              {isEmailCopied ? (
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                              ) : (
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                </svg>
+                              )}
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="right">
+                            {isEmailCopied ? 'Copied!' : 'Copy email'}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
                     <a
                       href="https://cal.com"
                       target="_blank"
