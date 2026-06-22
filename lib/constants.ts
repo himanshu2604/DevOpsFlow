@@ -18,3 +18,5 @@ export const PRICING = {
     timeline: '/month',
   },
 } as const
+
+export const CONTACT_EMAIL = 'hello@devopsflow.dev'
