@@ -78,19 +78,27 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
     return null
   }
 
+  // 🛡️ Sentinel 2025-05-15: CSS Injection — Sanitize id, key, and color to prevent arbitrary CSS injection via dangerouslySetInnerHTML.
+  const sanitize = (val: string) => val.replace(/[^a-zA-Z0-9\-_]/g, '')
+  const sanitizeColor = (val: string) => val.replace(/[;{}]/g, '')
+
+  const safeId = sanitize(id)
+
   return (
     <style
       dangerouslySetInnerHTML={{
         __html: Object.entries(THEMES)
           .map(
             ([theme, prefix]) => `
-${prefix} [data-chart=${id}] {
+${prefix} [data-chart=${safeId}] {
 ${colorConfig
   .map(([key, itemConfig]) => {
     const color =
       itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
       itemConfig.color
-    return color ? `  --color-${key}: ${color};` : null
+    const safeKey = sanitize(key)
+    const safeColor = color ? sanitizeColor(color) : null
+    return safeColor ? `  --color-${safeKey}: ${safeColor};` : null
   })
   .join('\n')}
 }
