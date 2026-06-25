@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
@@ -33,6 +33,18 @@ interface FloatingInputProps extends React.InputHTMLAttributes<HTMLInputElement 
   maxCharCount?: number
 }
 
+interface FloatingSelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+  label: string
+  error?: string
+  isTouched?: boolean
+  options: { id: string; label: string }[]
+}
+
+/**
+ * 🎨 Palette: Improved accessibility and unified styling for contact form inputs.
+ * - Added aria-live="polite" to character counter.
+ * - Proper aria-invalid and aria-describedby for error handling.
+ */
 function FloatingInput({
   label,
   error,
@@ -41,6 +53,8 @@ function FloatingInput({
   className,
   charCount,
   maxCharCount,
+  onFocus,
+  onBlur,
   ...props
 }: FloatingInputProps) {
   const [isFocused, setIsFocused] = useState(false)
@@ -65,11 +79,11 @@ function FloatingInput({
           {...(props as any)}
           onFocus={(e) => {
             setIsFocused(true)
-            props.onFocus?.(e)
+            onFocus?.(e as any)
           }}
           onBlur={(e) => {
             setIsFocused(false)
-            props.onBlur?.(e)
+            onBlur?.(e as any)
           }}
           aria-invalid={!!error}
           aria-describedby={error ? errorId : undefined}
@@ -78,7 +92,7 @@ function FloatingInput({
             isTextArea ? "min-h-[150px] pb-8 resize-none" : "pb-2",
             className
           )}
-          placeholder=" " // Required for the peer-placeholder-shown trick or custom logic
+          placeholder=" "
         />
         <label
           htmlFor={props.id}
@@ -115,16 +129,116 @@ function FloatingInput({
         )}
 
         {charCount !== undefined && maxCharCount !== undefined && (
-          <div className={cn(
-            "absolute right-4 bottom-2 text-[10px] font-mono transition-colors",
-            charCount >= maxCharCount ? "text-destructive" :
-            charCount >= maxCharCount * 0.8 ? "text-amber-500" : "text-muted-foreground"
-          )}>
+          <div
+            aria-live="polite"
+            className={cn(
+              "absolute right-4 bottom-2 text-[10px] font-mono transition-colors",
+              charCount >= maxCharCount ? "text-destructive" :
+              charCount >= maxCharCount * 0.8 ? "text-amber-500" : "text-muted-foreground"
+            )}
+          >
             {charCount}/{maxCharCount}
           </div>
         )}
       </div>
 
+      <AnimatePresence>
+        {error && (
+          <motion.p
+            id={errorId}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="text-destructive text-xs mt-1 ml-1"
+          >
+            {error}
+          </motion.p>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  )
+}
+
+/**
+ * 🎨 Palette: Reusable FloatingSelect component to maintain UI parity with FloatingInput.
+ * Improves accessibility by providing a consistent focused state and ARIA attributes.
+ */
+function FloatingSelect({
+  label,
+  error,
+  isTouched,
+  options,
+  className,
+  onFocus,
+  onBlur,
+  ...props
+}: FloatingSelectProps) {
+  const [isFocused, setIsFocused] = useState(false)
+  const hasValue = props.value !== ''
+  const isValid = isTouched && !error && hasValue
+  const errorId = props.id ? `${props.id}-error` : undefined
+
+  return (
+    <motion.div
+      className="relative group"
+      animate={error ? { x: [-1, 1, -1, 1, 0], transition: { duration: 0.2 } } : {}}
+    >
+      <div className={cn(
+        "relative rounded-lg border bg-card transition-all duration-200",
+        isFocused ? "border-primary shadow-[0_0_15px_rgba(0,229,160,0.1)] ring-2 ring-primary/20" : "border-border",
+        error ? "border-destructive ring-1 ring-destructive/20" :
+        isValid ? "border-primary/50" : "group-hover:border-white/20"
+      )}>
+        <select
+          {...props}
+          onFocus={(e) => {
+            setIsFocused(true)
+            onFocus?.(e)
+          }}
+          onBlur={(e) => {
+            setIsFocused(false)
+            onBlur?.(e)
+          }}
+          aria-invalid={!!error}
+          aria-describedby={error ? errorId : undefined}
+          className={cn(
+            "w-full bg-transparent px-4 pt-6 pb-2 text-foreground outline-none appearance-none cursor-pointer",
+            className
+          )}
+        >
+          <option value="" disabled className="bg-background opacity-0">
+            {isFocused ? `Select ${label.toLowerCase()}` : ''}
+          </option>
+          {options.map((option) => (
+            <option key={option.id} value={option.id} className="bg-background">
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <label
+          htmlFor={props.id}
+          className={cn(
+            "absolute left-4 transition-all duration-200 pointer-events-none text-muted-foreground",
+            (isFocused || hasValue)
+              ? "text-[10px] uppercase tracking-wider font-bold top-2 text-primary"
+              : "text-base top-4"
+          )}
+        >
+          {label}
+          {props.required && <span className="text-destructive ml-1" aria-hidden="true">*</span>}
+        </label>
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground" aria-hidden="true">
+          {isValid ? (
+            <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          ) : (
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          )}
+        </div>
+      </div>
       <AnimatePresence>
         {error && (
           <motion.p
@@ -168,7 +282,6 @@ function ContactContent() {
   const [submitError, setSubmitError] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [touched, setTouched] = useState<Record<string, boolean>>({})
-  const [focusedField, setFocusedField] = useState<string | null>(null)
   const [isEmailCopied, setIsEmailCopied] = useState(false)
 
   const handleCopyEmail = () => {
@@ -252,12 +365,6 @@ function ContactContent() {
     const { name, value } = e.target
     setTouched(prev => ({ ...prev, [name]: true }))
     validateField(name, value)
-  }
-
-  const getMessageCounterColor = (length: number) => {
-    if (length >= 500) return 'text-red-500'
-    if (length >= 400) return 'text-amber-500'
-    return 'text-muted-foreground'
   }
 
   return (
@@ -364,145 +471,31 @@ function ContactContent() {
                     />
 
                     <div className="grid md:grid-cols-2 gap-6">
-                    <div className="relative group">
-                      <div className={cn(
-                        "relative rounded-lg border bg-card transition-all duration-200",
-                        focusedField === 'service' ? "border-primary shadow-[0_0_15px_rgba(0,229,160,0.1)] ring-2 ring-primary/20" : "border-border",
-                        errors.service ? "border-destructive ring-1 ring-destructive/20" :
-                        (formState.service && !errors.service) ? "border-primary/50" : "group-hover:border-white/20"
-                      )}>
-                        <select
-                          id="service"
-                          name="service"
-                          value={formState.service}
-                          onChange={handleChange}
-                          onFocus={() => setFocusedField('service')}
-                          onBlur={(e) => {
-                            setFocusedField(null)
-                            handleBlur(e)
-                          }}
-                          aria-invalid={!!errors.service}
-                          aria-describedby={errors.service ? 'service-error' : undefined}
-                          className="w-full bg-transparent px-4 pt-6 pb-2 text-foreground outline-none appearance-none cursor-pointer"
-                          required
-                        >
-                          <option value="" disabled className="bg-background opacity-0">
-                            {focusedField === 'service' ? 'Select a service' : ''}
-                          </option>
-                          {services.map((service) => (
-                            <option key={service.id} value={service.id} className="bg-background">
-                              {service.label}
-                            </option>
-                          ))}
-                        </select>
-                        <label
-                          htmlFor="service"
-                          className={cn(
-                            "absolute left-4 transition-all duration-200 pointer-events-none text-muted-foreground",
-                            (formState.service || focusedField === 'service')
-                              ? "text-[10px] uppercase tracking-wider font-bold top-2 text-primary"
-                              : "text-base top-4"
-                          )}
-                        >
-                          Service interested in
-                          <span className="text-destructive ml-1" aria-hidden="true">*</span>
-                        </label>
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground" aria-hidden="true">
-                          {touched.service && !errors.service ? (
-                            <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                          ) : (
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
-                          )}
-                        </div>
-                      </div>
-                      <AnimatePresence>
-                        {errors.service && (
-                          <motion.p
-                            id="service-error"
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            className="text-destructive text-xs mt-1 ml-1"
-                          >
-                            {errors.service}
-                          </motion.p>
-                        )}
-                      </AnimatePresence>
-                    </div>
+                      <FloatingSelect
+                        label="Service interested in"
+                        id="service"
+                        name="service"
+                        options={services}
+                        value={formState.service}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        error={errors.service}
+                        isTouched={touched.service}
+                        required
+                      />
 
-                    <div className="relative group">
-                      <div className={cn(
-                        "relative rounded-lg border bg-card transition-all duration-200",
-                        focusedField === 'timeline' ? "border-primary shadow-[0_0_15px_rgba(0,229,160,0.1)] ring-2 ring-primary/20" : "border-border",
-                        errors.timeline ? "border-destructive ring-1 ring-destructive/20" :
-                        (formState.timeline && !errors.timeline) ? "border-primary/50" : "group-hover:border-white/20"
-                      )}>
-                        <select
-                          id="timeline"
-                          name="timeline"
-                          value={formState.timeline}
-                          onChange={handleChange}
-                          onFocus={() => setFocusedField('timeline')}
-                          onBlur={(e) => {
-                            setFocusedField(null)
-                            handleBlur(e)
-                          }}
-                          aria-invalid={!!errors.timeline}
-                          aria-describedby={errors.timeline ? 'timeline-error' : undefined}
-                          className="w-full bg-transparent px-4 pt-6 pb-2 text-foreground outline-none appearance-none cursor-pointer"
-                          required
-                        >
-                          <option value="" disabled className="bg-background opacity-0">
-                            {focusedField === 'timeline' ? 'Select a timeline' : ''}
-                          </option>
-                          {timelines.map((timeline) => (
-                            <option key={timeline.id} value={timeline.id} className="bg-background">
-                              {timeline.label}
-                            </option>
-                          ))}
-                        </select>
-                        <label
-                          htmlFor="timeline"
-                          className={cn(
-                            "absolute left-4 transition-all duration-200 pointer-events-none text-muted-foreground",
-                            (formState.timeline || focusedField === 'timeline')
-                              ? "text-[10px] uppercase tracking-wider font-bold top-2 text-primary"
-                              : "text-base top-4"
-                          )}
-                        >
-                          Preferred Timeline
-                          <span className="text-destructive ml-1" aria-hidden="true">*</span>
-                        </label>
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground" aria-hidden="true">
-                          {touched.timeline && !errors.timeline ? (
-                            <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                          ) : (
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
-                          )}
-                        </div>
-                      </div>
-                      <AnimatePresence>
-                        {errors.timeline && (
-                          <motion.p
-                            id="timeline-error"
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            className="text-destructive text-xs mt-1 ml-1"
-                          >
-                            {errors.timeline}
-                          </motion.p>
-                        )}
-                      </AnimatePresence>
-                    </div>
+                      <FloatingSelect
+                        label="Preferred Timeline"
+                        id="timeline"
+                        name="timeline"
+                        options={timelines}
+                        value={formState.timeline}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        error={errors.timeline}
+                        isTouched={touched.timeline}
+                        required
+                      />
                     </div>
 
                     <div className="space-y-4">
