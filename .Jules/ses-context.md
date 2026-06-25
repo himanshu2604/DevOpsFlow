@@ -4,7 +4,7 @@
 
 ## Client info
 
-client_name: "[Company Name]"
+client_name: "DevOpsFlow"
 tier: "Starter / Growth / Pro"
 operator_notes: ""
 
@@ -29,7 +29,8 @@ maintainability_weight: 15
 
 # What should agents focus on? (e.g. "dashboard load time, mobile checkout UX")
 
-priorities: ""
+priorities: "Run a full audit first — no specific priorities set.
+Pick the highest impact item in each pillar based on scan results."
 
 ## Off-limits files (agents must never touch these)
 
