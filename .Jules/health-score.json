@@ -1,0 +1,10 @@
+{
+  "client": "DevOpsFlow",
+  "last_updated": "2026-06-25",
+  "performance_score": 0,
+  "security_score": 2,
+  "ux_score": 0,
+  "maintainability_score": 0,
+  "overall_score": 0.6,
+  "week_summary": "Security score improved following a fix for a CSS injection vulnerability in the Chart component."
+}
