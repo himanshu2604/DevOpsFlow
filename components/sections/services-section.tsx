@@ -1,5 +1,7 @@
 'use client'
 
+// 🎨 Palette 2025-07-04: Improved Services section accessibility with unique CTA labels, natural language pricing descriptions, and decorative element hiding. — accessibility/UX impact
+
 import { motion, useReducedMotion } from 'framer-motion'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -134,10 +136,12 @@ export function ServicesSection() {
         <motion.div
           {...bannerAnims}
           className="max-w-fit mx-auto mb-12"
+          role="region"
+          aria-label="Special Offer"
         >
           <div className="bg-amber-500/10 border border-amber-500/20 rounded-full px-6 py-2 flex items-center gap-2">
             <span className="text-amber-200/90 font-medium text-sm md:text-base">
-              🎉 Launch pricing — Save up to $1,500 on your first project. Limited availability.
+              <span aria-hidden="true">🎉</span> Launch pricing — Save up to $1,500 on your first project. Limited availability.
             </span>
           </div>
         </motion.div>
@@ -162,7 +166,7 @@ export function ServicesSection() {
               <div className={`xl:h-full rounded-2xl overflow-hidden ${
                 service.highlighted 
                   ? 'bg-card border-2 border-secondary glow-secondary' 
-                  : 'glass border border-border/50 hover:border-primary/30'
+                  : 'glass border border-border/50 hover:border-primary/30 hover:shadow-[0_0_20px_rgba(0,229,160,0.1)]'
               } transition-all duration-300`}>
                 <div className="p-8 flex flex-col h-full xl:justify-between">
                   <div>
@@ -177,9 +181,11 @@ export function ServicesSection() {
                             Regular price:
                           </span>
                           <span className="text-sm text-muted-foreground line-through decoration-destructive/50">
+                            <span className="sr-only">Original price: </span>
                             {service.originalPrice}
                           </span>
                           <span className="px-2 py-0.5 bg-amber-500/10 text-amber-500 text-[10px] font-bold rounded flex items-center">
+                            <span className="sr-only">Discount: </span>
                             {service.discount}
                           </span>
                         </div>
@@ -203,7 +209,7 @@ export function ServicesSection() {
                     <ul className="space-y-3 mb-8">
                       {service.features.map((feature) => (
                         <li key={feature} className="flex items-start gap-3">
-                          <svg className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
                           <span className="text-sm text-muted-foreground">{feature}</span>
@@ -218,10 +224,11 @@ export function ServicesSection() {
                       asChild
                       variant={service.highlighted ? 'secondary' : 'outline'}
                       className="w-full"
+                      aria-label={`Get started with ${service.name}`}
                     >
                       <Link href="/contact">
                         Get Started
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                         </svg>
                       </Link>
