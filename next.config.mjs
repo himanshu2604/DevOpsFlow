@@ -7,6 +7,7 @@ const nextConfig = {
     unoptimized: true,
   },
   poweredByHeader: false,
+  // 🛡️ Sentinel 2025-05-15: Security enhancement — Expand security headers and restrict browser features.
   // Security: Add security headers to protect the application
   async headers() {
     return [
@@ -31,7 +32,11 @@ const nextConfig = {
           },
           {
             key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=(), browsing-topics=()',
+            value: 'camera=(), microphone=(), geolocation=(), browsing-topics=(), fullscreen=(), payment=(), usb=(), picture-in-picture=()',
+          },
+          {
+            key: 'X-Permitted-Cross-Domain-Policies',
+            value: 'none',
           },
           {
             key: 'X-DNS-Prefetch-Control',
