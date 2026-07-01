@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useEffect, useState, useCallback, useRef } from 'react'
+import { motion, AnimatePresence, useInView } from 'framer-motion'
 
 const deploymentLines = [
   { text: 'git push origin main', type: 'command' },
@@ -19,6 +19,8 @@ const LINE_DELAY = 200
 const CYCLE_DURATION = 10000
 
 export function TerminalWindow() {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const isInView = useInView(containerRef)
   const [visibleLines, setVisibleLines] = useState<{ text: string; type: string; displayText: string }[]>([])
   const [currentLineIndex, setCurrentLineIndex] = useState(0)
   const [currentCharIndex, setCurrentCharIndex] = useState(0)
@@ -36,7 +38,8 @@ export function TerminalWindow() {
 
   // Typing effect
   useEffect(() => {
-    if (!isVisible) return
+    // ⚡ Bolt: Pause typing when off-screen to save resources
+    if (!isVisible || !isInView) return
     if (currentLineIndex >= deploymentLines.length) return
 
     const currentLine = deploymentLines[currentLineIndex]
@@ -86,11 +89,14 @@ export function TerminalWindow() {
 
   // Cycle animation
   useEffect(() => {
+    // ⚡ Bolt: Pause cycle when off-screen
+    if (!isInView) return
+
     const cycleTimer = setInterval(() => {
       resetAnimation()
     }, CYCLE_DURATION)
     return () => clearInterval(cycleTimer)
-  }, [resetAnimation])
+  }, [resetAnimation, isInView])
 
   const getLineStyles = (type: string) => {
     switch (type) {
@@ -106,7 +112,7 @@ export function TerminalWindow() {
   }
 
   return (
-    <div className="relative group">
+    <div ref={containerRef} className="relative group">
       <div className="sr-only">
         An animated terminal window showing a deployment process: pushing to main, triggering CI,
         running Docker build and security scans, syncing with ArgoCD, and completing a

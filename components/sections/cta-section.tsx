@@ -1,10 +1,13 @@
 'use client'
 
-import { motion, useReducedMotion } from 'framer-motion'
+import { useRef } from 'react'
+import { motion, useReducedMotion, useInView } from 'framer-motion'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 
 export function CTASection() {
+  const sectionRef = useRef<HTMLElement>(null)
+  const isInView = useInView(sectionRef)
   const prefersReducedMotion = useReducedMotion()
 
   const contentAnims = prefersReducedMotion ? {} : {
@@ -15,7 +18,7 @@ export function CTASection() {
   }
 
   return (
-    <section className="relative py-24 overflow-hidden">
+    <section ref={sectionRef} className="relative py-24 overflow-hidden">
       {/* Background with beam effects */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-card/50 to-background" />
       
@@ -24,9 +27,10 @@ export function CTASection() {
         <motion.div
           className="absolute top-1/2 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"
           style={{ willChange: 'transform' }}
-          animate={{
+          // ⚡ Bolt: Pause beams when off-screen to save resources
+          animate={isInView ? {
             x: ['-100%', '100%'],
-          }}
+          } : {}}
           transition={{
             duration: 3,
             repeat: Infinity,
@@ -36,9 +40,10 @@ export function CTASection() {
         <motion.div
           className="absolute top-1/3 left-0 w-full h-px bg-gradient-to-r from-transparent via-secondary/15 to-transparent"
           style={{ willChange: 'transform' }}
-          animate={{
+          // ⚡ Bolt: Pause beams when off-screen to save resources
+          animate={isInView ? {
             x: ['100%', '-100%'],
-          }}
+          } : {}}
           transition={{
             duration: 4,
             repeat: Infinity,
@@ -48,9 +53,10 @@ export function CTASection() {
         <motion.div
           className="absolute top-2/3 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/15 to-transparent"
           style={{ willChange: 'transform' }}
-          animate={{
+          // ⚡ Bolt: Pause beams when off-screen to save resources
+          animate={isInView ? {
             x: ['-100%', '100%'],
-          }}
+          } : {}}
           transition={{
             duration: 5,
             repeat: Infinity,

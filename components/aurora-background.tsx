@@ -1,11 +1,13 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
+import { motion, useScroll, useTransform, useSpring, useInView, useReducedMotion } from 'framer-motion'
 
 export function AuroraBackground({ className = '' }: { className?: string }) {
   const [mounted, setMounted] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const isInView = useInView(containerRef)
+  const prefersReducedMotion = useReducedMotion()
   
   const { scrollY } = useScroll()
   
@@ -50,10 +52,11 @@ export function AuroraBackground({ className = '' }: { className?: string }) {
             y: blob1Y,
             willChange: 'transform', // Bolt: Promote to compositor layer for smoother animations
           }}
-          animate={{
+          // ⚡ Bolt: Pause animation when off-screen or reduced motion is enabled to save CPU/GPU
+          animate={isInView && !prefersReducedMotion ? {
             x: [0, 40, -30, 20, 0],
             scale: [1, 1.15, 0.95, 1.1, 1],
-          }}
+          } : {}}
           transition={{
             duration: 20,
             repeat: Infinity,
@@ -70,10 +73,11 @@ export function AuroraBackground({ className = '' }: { className?: string }) {
             y: blob2Y,
             willChange: 'transform', // Bolt: Promote to compositor layer for smoother animations
           }}
-          animate={{
+          // ⚡ Bolt: Pause animation when off-screen or reduced motion is enabled to save CPU/GPU
+          animate={isInView && !prefersReducedMotion ? {
             x: [0, -50, 30, -20, 0],
             scale: [1, 0.9, 1.15, 0.95, 1],
-          }}
+          } : {}}
           transition={{
             duration: 25,
             repeat: Infinity,
@@ -90,10 +94,11 @@ export function AuroraBackground({ className = '' }: { className?: string }) {
             y: blob3Y,
             willChange: 'transform', // Bolt: Promote to compositor layer for smoother animations
           }}
-          animate={{
+          // ⚡ Bolt: Pause animation when off-screen or reduced motion is enabled to save CPU/GPU
+          animate={isInView && !prefersReducedMotion ? {
             x: [0, 60, -40, 30, 0],
             scale: [1, 1.2, 0.85, 1.1, 1],
-          }}
+          } : {}}
           transition={{
             duration: 18,
             repeat: Infinity,
@@ -109,12 +114,13 @@ export function AuroraBackground({ className = '' }: { className?: string }) {
             filter: 'blur(40px)',
             willChange: 'transform, opacity', // Bolt: Particle also animates opacity
           }}
-          animate={{
+          // ⚡ Bolt: Pause animation when off-screen or reduced motion is enabled to save CPU/GPU
+          animate={isInView && !prefersReducedMotion ? {
             x: [0, 40, -30, 0],
             y: [0, -50, 30, 0],
             scale: [1, 1.3, 0.7, 1],
             opacity: [0.6, 1, 0.4, 0.6],
-          }}
+          } : {}}
           transition={{
             duration: 15,
             repeat: Infinity,
@@ -130,12 +136,13 @@ export function AuroraBackground({ className = '' }: { className?: string }) {
             filter: 'blur(35px)',
             willChange: 'transform, opacity', // Bolt: Particle also animates opacity
           }}
-          animate={{
+          // ⚡ Bolt: Pause animation when off-screen or reduced motion is enabled to save CPU/GPU
+          animate={isInView && !prefersReducedMotion ? {
             x: [0, -35, 45, 0],
             y: [0, 40, -30, 0],
             scale: [1, 0.8, 1.4, 1],
             opacity: [0.5, 0.9, 0.3, 0.5],
-          }}
+          } : {}}
           transition={{
             duration: 12,
             repeat: Infinity,
@@ -151,10 +158,11 @@ export function AuroraBackground({ className = '' }: { className?: string }) {
             filter: 'blur(50px)',
             willChange: 'transform', // Bolt: Promote to compositor layer for smoother animations
           }}
-          animate={{
+          // ⚡ Bolt: Pause animation when off-screen or reduced motion is enabled to save CPU/GPU
+          animate={isInView && !prefersReducedMotion ? {
             x: [0, 30, -20, 0],
             scale: [1, 1.1, 0.9, 1],
-          }}
+          } : {}}
           transition={{
             duration: 22,
             repeat: Infinity,
