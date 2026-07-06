@@ -1,19 +1,36 @@
 'use client'
 
+// 🎨 Palette 2025-07-11: Improved Portfolio section accessibility with natural language metric descriptions, contextual CTA labels, and semantic grouping for tech stacks. — accessibility/UX impact
+
 import { motion, useReducedMotion } from 'framer-motion'
 import Link from 'next/link'
 import { GlassCard } from '@/components/glass-card'
 import { PRICING } from '@/lib/constants'
 
-const projects = [
+interface ProjectMetric {
+  label: string
+  value: string
+  srValue?: string
+}
+
+interface Project {
+  title: string
+  client: string
+  description: string
+  metrics: ProjectMetric[]
+  techStack: string[]
+  gradient: string
+}
+
+const projects: Project[] = [
   {
     title: 'GitOps Pipeline',
     client: 'Series A Fintech',
     description: 'Implemented a complete GitOps workflow with ArgoCD, enabling the engineering team to ship 10x faster with full rollback capabilities.',
     metrics: [
-      { label: 'Deploy Time', value: '45 min → 4 min' },
-      { label: 'Deployments/Week', value: '3 → 28' },
-      { label: 'Rollback Time', value: '< 30 sec' },
+      { label: 'Deploy Time', value: '45 min → 4 min', srValue: '45 minutes reduced to 4 minutes' },
+      { label: 'Deployments/Week', value: '3 → 28', srValue: '3 increased to 28' },
+      { label: 'Rollback Time', value: '< 30 sec', srValue: 'less than 30 seconds' },
     ],
     techStack: ['ArgoCD', 'GitHub Actions', 'Kubernetes', 'Helm', 'Terraform'],
     gradient: 'from-primary/20 to-teal-500/20',
@@ -23,9 +40,9 @@ const projects = [
     client: 'YC-backed SaaS',
     description: 'Built production-ready AWS infrastructure from scratch with EKS, VPC networking, and comprehensive monitoring for a fast-growing startup.',
     metrics: [
-      { label: 'Uptime', value: '99.95%' },
-      { label: 'Monthly AWS Cost', value: '-42%' },
-      { label: 'Time to Market', value: PRICING.INFRASTRUCTURE.timeline },
+      { label: 'Uptime', value: '99.95%', srValue: '99.95 percent' },
+      { label: 'Monthly AWS Cost', value: '-42%', srValue: 'reduced by 42 percent' },
+      { label: 'Time to Market', value: PRICING.INFRASTRUCTURE.timeline, srValue: PRICING.INFRASTRUCTURE.timeline },
     ],
     techStack: ['AWS EKS', 'Terraform', 'Prometheus', 'Grafana', 'Loki'],
     gradient: 'from-secondary/20 to-purple-500/20',
@@ -112,9 +129,13 @@ export function PortfolioSection() {
                       {project.metrics.map((metric) => (
                         <div key={metric.label}>
                           <div className="text-lg font-display font-bold text-primary">
-                            {metric.value}
+                            <span className="sr-only">{metric.label}: </span>
+                            <span aria-hidden={!!metric.srValue}>{metric.value}</span>
+                            {metric.srValue && (
+                              <span className="sr-only">{metric.srValue}</span>
+                            )}
                           </div>
-                          <div className="text-xs text-muted-foreground">
+                          <div className="text-xs text-muted-foreground" aria-hidden="true">
                             {metric.label}
                           </div>
                         </div>
@@ -122,7 +143,11 @@ export function PortfolioSection() {
                     </div>
 
                     {/* Tech stack */}
-                    <div className="flex flex-wrap gap-2 mb-6">
+                    <div
+                      className="flex flex-wrap gap-2 mb-6"
+                      role="group"
+                      aria-label={`Technologies used in ${project.title}`}
+                    >
                       {project.techStack.map((tech) => (
                         <span
                           key={tech}
@@ -138,6 +163,7 @@ export function PortfolioSection() {
                       <Link
                         href="/contact"
                         className="relative inline-flex items-center gap-2 text-primary font-medium group"
+                        aria-label={`Discuss the ${project.title} project for ${project.client}`}
                       >
                         <span className="relative after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 group-hover:after:w-full">
                           Discuss your project
